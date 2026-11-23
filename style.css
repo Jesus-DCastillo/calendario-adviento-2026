@@ -1,0 +1,77 @@
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  min-height: 100vh;
+  font-family: Georgia, serif;
+  background: linear-gradient(135deg, #201824, #49303d);
+  color: #fff8ef;
+  padding: 30px 16px;
+}
+
+.container {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+h1 {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+  margin: 35px 0 12px;
+  color: #f5d6c6;
+}
+
+.container > p {
+  color: #e4c9c9;
+  font-size: 1.1rem;
+  margin-bottom: 35px;
+}
+
+.calendar {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  max-width: 650px;
+  margin: 0 auto;
+}
+
+.door {
+  min-height: 85px;
+  border: 1px solid #d7a9a0;
+  border-radius: 12px;
+  background: #714653;
+  color: #fff8ef;
+  font-family: Georgia, serif;
+  font-size: 1.6rem;
+  cursor: pointer;
+  transition: transform 0.2s, background 0.2s;
+}
+
+.door:hover {
+  transform: translateY(-4px);
+  background: #956071;
+}
+
+.door:disabled {
+  background: #393039;
+  color: #9b8c96;
+  border-color: #65545e;
+  cursor: not-allowed;
+  transform: none;
+}
+
+@media (min-width: 600px) {
+  .calendar {
+    grid-template-columns: repeat(6, 1fr);
+    gap: 16px;
+  }
+
+  .door {
+    min-height: 100px;
+  }
+}
