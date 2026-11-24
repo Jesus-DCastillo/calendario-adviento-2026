@@ -143,71 +143,49 @@ musicButton.addEventListener("click", () => {
     "Tu soundtrack navideño está sonando.";
 });
 
+
 /* =====================================
    CONTENIDO DE LOS REGALOS
+   ESTRUCTURA DE LOS 93 REGALOS
    ===================================== */
 
+// Crea automáticamente los 31 días de un calendario
+function crearDiasBase() {
+  return Object.fromEntries(
+    Array.from({ length: 31 }, (_, indice) => {
+      const dia = indice + 1;
 
+      let titulo = "Una sorpresa para ti";
+
+      if (dia === 24) {
+        titulo = "Una sorpresa de Navidad";
+      }
+
+      if (dia === 31) {
+        titulo = "Un último capítulo";
+      }
+
+      return [
+        dia,
+        {
+          titulo: titulo,
+          elementos: [
+            {
+              tipo: "texto",
+              contenido: "Este regalo está pendiente de preparar."
+            }
+          ]
+        }
+      ];
+    })
+  );
+}
+
+// Los tres calendarios
 const regalos = {
-  milena: {
-    1: {
-      titulo: "Prueba de regalos",
-      elementos: [
-        {
-          tipo: "carta",
-          contenido: "Esta es una prueba de carta."
-        },
-        {
-          tipo: "texto",
-          contenido: "Este es un mensaje adicional."
-        },
-        {
-          tipo: "foto",
-          contenido: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800",
-          descripcion: "Paisaje de prueba"
-        },
-        {
-          tipo: "cupon",
-          contenido: "Una tarde especial",
-          descripcion: "Una experiencia para compartir.",
-          nota: "Canjeable cuando quieras."
-        },
-        {
-          tipo: "video",
-          contenido: "https://www.youtube.com/watch?v=MKHtXovAejs"
-        },
-        {
-          tipo: "enlace",
-          contenido: "https://www.youtube.com/",
-          texto: "Abrir YouTube"
-        }
-      ]
-    }
-  },
-
-  laura: {
-    1: {
-      titulo: "Prueba de Laura",
-      elementos: [
-        {
-          tipo: "carta",
-          contenido: "El sistema también funciona para Laura."
-        }
-      ]
-    }
-  },
-
-  luisa: {
-    1: {
-      titulo: "Prueba de Luisa",
-      elementos: [
-        {
-          tipo: "carta",
-          contenido: "El sistema también funciona para Luisa."
-        }
-      ]
-    }
-  }
+  milena: crearDiasBase(),
+  laura: crearDiasBase(),
+  luisa: crearDiasBase()
 };
 
 
