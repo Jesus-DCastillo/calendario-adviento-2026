@@ -18,39 +18,39 @@
 /* TEMAS PERSONALIZADOS */
 
 body.theme-milena {
-  --background: #f4e5e7;
-  --surface: #fff8f3;
-  --primary: #9d526b;
-  --secondary: #c9899c;
-  --text: #593342;
-  --muted: #886674;
-  --door: #d9a1b0;
-  --door-hover: #c47c94;
-  --border: #bd8295;
+  --background: #32151D;
+  --surface: #51212D;
+  --primary: #E8BFC0;
+  --secondary: #C77D7E;
+  --text: #FFF5EE;
+  --muted: #E1C5C0;
+  --door: #8E3542;
+  --door-hover: #AD4A56;
+  --border: #C18B76;
 }
 
 body.theme-laura {
-  --background: #e9eadf;
-  --surface: #f8f5e9;
-  --primary: #657a59;
-  --secondary: #a5ae88;
-  --text: #3d4937;
-  --muted: #737c67;
-  --door: #9da985;
-  --door-hover: #7f916b;
-  --border: #8b9877;
+  --background: #FFF0F4;
+  --surface: #FFFFFF;
+  --primary: #C66E91;
+  --secondary: #DFA3B9;
+  --text: #603B4D;
+  --muted: #987183;
+  --door: #E6AFC4;
+  --door-hover: #D987A9;
+  --border: #E8B9CC;
 }
 
 body.theme-luisa {
-  --background: #171219;
-  --surface: #2b1c28;
-  --primary: #d8b36a;
-  --secondary: #9d6a72;
-  --text: #fff4e4;
-  --muted: #c9aeb5;
-  --door: #633542;
-  --door-hover: #874956;
-  --border: #b9955c;
+  --background: #17121F;
+  --surface: #292033;
+  --primary: #C8A9F0;
+  --secondary: #A58AC9;
+  --text: #FAF5FF;
+  --muted: #D0C1E1;
+  --door: #68458D;
+  --door-hover: #8965AE;
+  --border: #B69AD8;
 }
 
 /* CONFIGURACION GENERAL */
