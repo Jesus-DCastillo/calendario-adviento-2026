@@ -79,6 +79,52 @@ enterButton.addEventListener("click", () => {
     persona.detalle + " · 31 días especiales";
 });
 
+/* =====================================
+   CONTENIDO DE LOS REGALOS
+   ===================================== */
+
+const regalos = {
+  milena: {
+    1: {
+      titulo: "Un comienzo especial",
+      elementos: [
+        {
+          tipo: "carta",
+          contenido: "Aquí irá el primer mensaje especial para Milena."
+        },
+        {
+          tipo: "foto",
+          contenido: "Aquí irá la primera fotografía."
+        }
+      ]
+    }
+  },
+
+  laura: {
+    1: {
+      titulo: "Una pequeña casualidad",
+      elementos: [
+        {
+          tipo: "carta",
+          contenido: "Aquí irá el primer mensaje especial para Laura."
+        }
+      ]
+    }
+  },
+
+  luisa: {
+    1: {
+      titulo: "Una posibilidad interesante",
+      elementos: [
+        {
+          tipo: "carta",
+          contenido: "Aquí irá el primer mensaje especial para Luisa."
+        }
+      ]
+    }
+  }
+};
+
 /* VENTANA DE SORPRESAS */
 
 const modal = document.getElementById("surprise-modal");
