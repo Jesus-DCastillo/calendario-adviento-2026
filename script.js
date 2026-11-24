@@ -198,67 +198,209 @@ const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
 
 function abrirSorpresa(dia) {
-  // Buscar el regalo de la persona y el día seleccionado
+  // Buscar el regalo correspondiente
   const regalo = regalos[destinataria]?.[dia];
 
-  // Mostrar el número del día
   modalDay.textContent = "DÍA " + dia + " · DICIEMBRE 2026";
+  modalBody.innerHTML = "";
 
-  // Si todavía no existe un regalo para ese día
   if (!regalo) {
     modalTitle.textContent = "Una sorpresa en preparación";
     modalBody.textContent = "Estamos preparando algo especial para ti.";
   } else {
-    // Mostrar el título del regalo
     modalTitle.textContent = regalo.titulo;
 
-    // Limpiar el contenido anterior
-    modalBody.innerHTML = "";
-
-    // Recorrer todos los elementos del regalo
+    // Recorrer los elementos del regalo
     regalo.elementos.forEach(elemento => {
-      const contenido = document.createElement("p");
 
-     // Mostrar el contenido según su tipo
-if (elemento.tipo === "carta") {
-  contenido.textContent = elemento.contenido;
-  contenido.className = "gift-letter";
+      // CARTAS
+      if (elemento.tipo === "carta") {
+        const carta = document.createElement("div");
+        carta.className = "gift-letter";
+        carta.textContent = elemento.contenido;
+        modalBody.appendChild(carta);
+      }
 
-} else if (elemento.tipo === "foto") {
-  const imagen = document.createElement("img");
+      // TEXTOS
+      else if (elemento.tipo === "texto") {
+        const texto = document.createElement("p");
+        texto.className = "gift-text";
+        texto.textContent = elemento.contenido;
+        modalBody.appendChild(texto);
+      }
 
-  imagen.src = elemento.contenido;
-  imagen.alt = "Fotografía de la sorpresa";
-  imagen.className = "gift-photo";
+      // FOTOGRAFÍAS
+      else if (elemento.tipo === "foto") {
+        const imagen = document.createElement("img");
 
-  modalBody.appendChild(imagen);
-  return;
+        imagen.src = elemento.contenido;
+        imagen.alt = elemento.descripcion || "Fotografía de la sorpresa";
+        imagen.className = "gift-photo";
+        imagen.loading = "lazy";
 
-} else if (elemento.tipo === "cancion") {
-  const reproductor = document.createElement("iframe");
+        modalBody.appendChild(imagen);
+      }
 
-  reproductor.src = elemento.contenido;
-  reproductor.width = "100%";
-  reproductor.height = "152";
-  reproductor.style.border = "0";
-  reproductor.style.borderRadius = "12px";
-  reproductor.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
-  reproductor.loading = "lazy";
+      // CANCIONES
+      else if (elemento.tipo === "cancion") {
+        const reproductor = crearReproductor(
+          elemento.contenido,
+          "cancion"
+        );
 
-  modalBody.appendChild(reproductor);
-  return;
+        if (reproductor) {
+          modalBody.appendChild(reproductor);
+        }
+      }
 
-} else {
-  contenido.textContent = elemento.contenido;
-}
+      // VIDEOS
+      else if (elemento.tipo === "video") {
+        const reproductor = crearReproductor(
+          elemento.contenido,
+          "video"
+        );
 
-modalBody.appendChild(contenido);
+        if (reproductor) {
+          modalBody.appendChild(reproductor);
+        }
+      }
+
+      // CUPONES
+      else if (elemento.tipo === "cupon") {
+        const cupon = document.createElement("div");
+        cupon.className = "gift-coupon";
+
+        const titulo = document.createElement("h3");
+        titulo.textContent = elemento.contenido;
+
+        const descripcion = document.createElement("p");
+        descripcion.textContent = elemento.descripcion || "";
+
+        cupon.appendChild(titulo);
+        cupon.appendChild(descripcion);
+
+        if (elemento.nota) {
+          const nota = document.createElement("small");
+          nota.textContent = elemento.nota;
+          cupon.appendChild(nota);
+        }
+
+        modalBody.appendChild(cupon);
+      }
+
+      // ENLACES EXTERNOS
+      else if (elemento.tipo === "enlace") {
+        try {
+          const url = new URL(elemento.contenido);
+
+          if (url.protocol !== "https:") {
+            throw new Error("Enlace no seguro");
+          }
+
+          const enlace = document.createElement("a");
+          enlace.href = url.href;
+          enlace.target = "_blank";
+          enlace.rel = "noopener noreferrer";
+          enlace.className = "gift-link";
+          enlace.textContent = elemento.texto || "Abrir sorpresa";
+
+          modalBody.appendChild(enlace);
+        } catch (error) {
+          console.warn("Enlace no válido:", error);
+        }
+      }
+
+      // TIPO DESCONOCIDO
+      else {
+        console.warn("Tipo de regalo no reconocido:", elemento.tipo);
+      }
     });
   }
 
   // Abrir la ventana
   modal.hidden = false;
   document.body.style.overflow = "hidden";
+}
+
+/* =====================================
+   CREACIÓN SEGURA DE REPRODUCTORES
+   ===================================== */
+
+function crearReproductor(enlace, tipo) {
+  try {
+    const url = new URL(enlace);
+
+    if (url.protocol !== "https:") {
+      throw new Error("El enlace debe usar HTTPS");
+    }
+
+    let direccion = "";
+
+    // Convertir enlaces normales de YouTube a formato insertable
+    if (
+      tipo === "video" ||
+      url.hostname === "youtube.com" ||
+      url.hostname === "www.youtube.com" ||
+      url.hostname === "youtu.be"
+    ) {
+      let videoId = "";
+
+      if (url.hostname === "youtu.be") {
+        videoId = url.pathname.slice(1);
+      } else if (url.pathname === "/watch") {
+        videoId = url.searchParams.get("v") || "";
+      } else if (
+        url.pathname.startsWith("/embed/") ||
+        url.pathname.startsWith("/shorts/")
+      ) {
+        videoId = url.pathname.split("/")[2] || "";
+      }
+
+      if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
+        throw new Error("ID de YouTube no válido");
+      }
+
+      direccion =
+        "https://www.youtube-nocookie.com/embed/" +
+        videoId +
+        "?rel=0";
+
+    } else if (
+      tipo === "cancion" &&
+      url.hostname === "open.spotify.com" &&
+      url.pathname.startsWith("/embed/")
+    ) {
+      direccion = url.href;
+
+    } else {
+      throw new Error("Proveedor de contenido no permitido");
+    }
+
+    const reproductor = document.createElement("iframe");
+
+    reproductor.src = direccion;
+    reproductor.title =
+      tipo === "video" ? "Video de la sorpresa" : "Canción de la sorpresa";
+    reproductor.className =
+      tipo === "video" ? "gift-media video" : "gift-media";
+    reproductor.height = tipo === "video" ? "220" : "152";
+    reproductor.allow =
+      "autoplay; encrypted-media; picture-in-picture";
+    reproductor.allowFullscreen = true;
+    reproductor.loading = "lazy";
+
+    return reproductor;
+
+  } catch (error) {
+    console.warn("No se pudo cargar el reproductor:", error);
+
+    const aviso = document.createElement("p");
+    aviso.className = "gift-text";
+    aviso.textContent =
+      "No pudimos cargar este contenido. Comprueba el enlace.";
+
+    return aviso;
+  }
 }
 
 function cerrarSorpresa() {
