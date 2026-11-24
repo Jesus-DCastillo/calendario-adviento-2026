@@ -326,3 +326,31 @@ h1 {
   transform: rotate(-3deg);
   box-shadow: 0 0 45px #9675BC35;
 }
+/* ACENTOS PERSONALIZADOS */
+
+/* Laura: rosa con detalles lavanda */
+body.theme-laura {
+  --accent: #B8A0D0;
+}
+
+.theme-laura .cover-art {
+  border-color: var(--accent);
+}
+
+.theme-laura .cover-symbol {
+  color: var(--accent);
+}
+
+/* Luisa: morado con dorado champaña */
+body.theme-luisa {
+  --accent: #D6B56D;
+}
+
+.theme-luisa .cover-art {
+  border-color: var(--accent);
+  box-shadow: 0 0 35px #D6B56D25;
+}
+
+.theme-luisa .cover-symbol {
+  color: var(--accent);
+}
