@@ -451,3 +451,30 @@ body.theme-luisa {
     font-size: 1.5rem;
   }
 }
+/* =====================================
+   DISEÑO DE CARTAS Y FOTOGRAFÍAS
+   ===================================== */
+
+.gift-letter {
+  padding: 20px;
+  margin: 20px 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #88888812;
+  color: var(--text);
+  text-align: left;
+  line-height: 1.9;
+  white-space: pre-line;
+  font-size: 1rem;
+}
+
+.gift-photo {
+  display: block;
+  width: 100%;
+  max-height: 320px;
+  object-fit: cover;
+  border-radius: 14px;
+  margin: 20px auto;
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 25px #00000020;
+}
