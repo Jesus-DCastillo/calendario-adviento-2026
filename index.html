@@ -8,15 +8,40 @@
   <title>31 días contigo</title>
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
-
   <main class="container">
-    <h1>31 días contigo</h1>
-    <p>Una sorpresa para cada día de diciembre.</p>
 
-    <section id="calendar" class="calendar">
-      <!-- Aquí aparecerán las 31 casillas -->
+    <section id="welcome">
+      <p id="edition">UNA EDICIÓN ESPECIAL DE NAVIDAD</p>
+      <h1 id="main-title">31 días contigo</h1>
+      <p id="subtitle">
+        Diciembre tiene algo especial reservado para ti.
+      </p>
+
+      <div class="login">
+        <label for="password">Tu contraseña</label>
+        <input
+          type="password"
+          id="password"
+          placeholder="Escribe tu contraseña"
+          autocomplete="off"
+        >
+        <button id="enter-button" type="button">
+          Descubrir mi calendario
+        </button>
+        <p id="login-message"></p>
+      </div>
     </section>
+
+    <section id="calendar-screen" hidden>
+      <h1 id="calendar-title">Tu diciembre especial</h1>
+      <p id="calendar-subtitle">
+        Una sorpresa para cada día.
+      </p>
+      <section id="calendar" class="calendar"></section>
+    </section>
+
   </main>
 
   <script src="script.js"></script>
