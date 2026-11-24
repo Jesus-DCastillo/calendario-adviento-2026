@@ -81,9 +81,6 @@ enterButton.addEventListener("click", () => {
   document.getElementById("calendar-subtitle").textContent =
     persona.detalle + " · 31 días especiales";
 });
-/* =====================================
-   MÚSICA AMBIENTAL NAVIDEÑA
-   ===================================== */
 
 /* =====================================
    MÚSICA AMBIENTAL NAVIDEÑA
