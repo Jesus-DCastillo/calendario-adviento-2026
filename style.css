@@ -1,4 +1,60 @@
 
+/* =====================================
+   31 DIAS CONTIGO - ESTILOS PRINCIPALES
+===================================== */
+
+:root {
+  --background: #201824;
+  --surface: #49303d;
+  --primary: #f0c6cf;
+  --secondary: #d7a9a0;
+  --text: #fff8ef;
+  --muted: #e4c9c9;
+  --door: #714653;
+  --door-hover: #956071;
+  --border: #d7a9a0;
+}
+
+/* TEMAS PERSONALIZADOS */
+
+body.theme-milena {
+  --background: #f4e5e7;
+  --surface: #fff8f3;
+  --primary: #9d526b;
+  --secondary: #c9899c;
+  --text: #593342;
+  --muted: #886674;
+  --door: #d9a1b0;
+  --door-hover: #c47c94;
+  --border: #bd8295;
+}
+
+body.theme-laura {
+  --background: #e9eadf;
+  --surface: #f8f5e9;
+  --primary: #657a59;
+  --secondary: #a5ae88;
+  --text: #3d4937;
+  --muted: #737c67;
+  --door: #9da985;
+  --door-hover: #7f916b;
+  --border: #8b9877;
+}
+
+body.theme-luisa {
+  --background: #171219;
+  --surface: #2b1c28;
+  --primary: #d8b36a;
+  --secondary: #9d6a72;
+  --text: #fff4e4;
+  --muted: #c9aeb5;
+  --door: #633542;
+  --door-hover: #874956;
+  --border: #b9955c;
+}
+
+/* CONFIGURACION GENERAL */
+
 * {
   margin: 0;
   padding: 0;
@@ -8,62 +64,179 @@
 body {
   min-height: 100vh;
   font-family: Georgia, serif;
-  background: linear-gradient(135deg, #201824, #49303d);
-  color: #fff8ef;
+  background: var(--background);
+  color: var(--text);
   padding: 30px 16px;
+  transition: background 0.5s, color 0.5s;
+}
+
+button,
+input {
+  font: inherit;
 }
 
 .container {
   width: 100%;
-  max-width: 900px;
+  max-width: 950px;
   margin: 0 auto;
   text-align: center;
 }
 
-h1 {
-  font-size: clamp(2rem, 6vw, 3.5rem);
-  margin: 35px 0 12px;
-  color: #f5d6c6;
+/* PORTADA */
+
+#welcome {
+  min-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 35px 15px;
+  animation: appear 1s ease;
 }
 
-.container > p {
-  color: #e4c9c9;
+#edition {
+  color: var(--secondary);
+  letter-spacing: 4px;
+  font-family: Arial, sans-serif;
+  font-size: 0.7rem;
+  font-weight: bold;
+  margin-bottom: 28px;
+}
+
+h1 {
+  font-size: clamp(2.5rem, 8vw, 5rem);
+  line-height: 1.1;
+  color: var(--primary);
+  margin-bottom: 20px;
+}
+
+#welcome > p:not(#edition) {
+  max-width: 480px;
+  color: var(--muted);
+  font-size: clamp(1rem, 3vw, 1.25rem);
+  line-height: 1.7;
+}
+
+/* ACCESO */
+
+.login {
+  width: 100%;
+  max-width: 360px;
+  margin-top: 45px;
+  padding: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.login label {
+  color: var(--primary);
+  font-size: 1rem;
+}
+
+.login input {
+  width: 100%;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--background);
+  color: var(--text);
+  outline: none;
+}
+
+.login input:focus {
+  border-color: var(--primary);
+}
+
+.login button {
+  padding: 15px;
+  border: none;
+  border-radius: 9px;
+  background: var(--primary);
+  color: var(--background);
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.login button:hover {
+  transform: translateY(-3px);
+  opacity: 0.9;
+}
+
+#login-message {
+  min-height: 18px;
+  color: var(--secondary);
+  font-size: 0.85rem;
+}
+
+/* CALENDARIO */
+
+#calendar-screen {
+  padding: 40px 0;
+  animation: appear 0.8s ease;
+}
+
+#calendar-title {
+  font-size: clamp(2rem, 6vw, 3.5rem);
+}
+
+#calendar-subtitle {
+  color: var(--muted);
+  margin: 15px 0 35px;
   font-size: 1.1rem;
-  margin-bottom: 35px;
 }
 
 .calendar {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 12px;
-  max-width: 650px;
+  max-width: 700px;
   margin: 0 auto;
 }
 
 .door {
   min-height: 85px;
-  border: 1px solid #d7a9a0;
-  border-radius: 12px;
-  background: #714653;
+  border: 1px solid var(--border);
+  border-radius: 13px;
+  background: var(--door);
   color: #fff8ef;
-  font-family: Georgia, serif;
   font-size: 1.6rem;
   cursor: pointer;
-  transition: transform 0.2s, background 0.2s;
+  transition: transform 0.25s, background 0.25s;
+  box-shadow: 0 5px 12px #00000018;
 }
 
-.door:hover {
-  transform: translateY(-4px);
-  background: #956071;
+.door:hover:not(:disabled) {
+  transform: translateY(-5px) scale(1.03);
+  background: var(--door-hover);
 }
 
 .door:disabled {
-  background: #393039;
-  color: #9b8c96;
-  border-color: #65545e;
+  background: var(--surface);
+  color: var(--muted);
   cursor: not-allowed;
-  transform: none;
+  opacity: 0.65;
 }
+
+/* ANIMACIONES */
+
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ADAPTACION A CELULARES Y PC */
 
 @media (min-width: 600px) {
   .calendar {
@@ -72,6 +245,21 @@ h1 {
   }
 
   .door {
-    min-height: 100px;
+    min-height: 105px;
+  }
+}
+
+@media (max-width: 380px) {
+  .calendar {
+    gap: 8px;
+  }
+
+  .door {
+    min-height: 70px;
+    font-size: 1.3rem;
+  }
+
+  .login {
+    padding: 20px;
   }
 }
