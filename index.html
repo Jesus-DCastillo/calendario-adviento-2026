@@ -2,66 +2,466 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <!-- =================================
+       CONFIGURACIÓN GENERAL
+  ================================== -->
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
   <meta name="theme-color" content="#201824">
+  <meta name="color-scheme" content="light">
+
+  <meta
+    name="description"
+    content="31 días, 31 sorpresas y un diciembre creado especialmente para ti."
+  >
+
+  <meta name="author" content="">
+
   <title>31 días contigo</title>
+
+  <!-- Tipografía y estilos -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:wght@400;500;600;700&display=swap"
+    rel="stylesheet"
+  >
+
   <link rel="stylesheet" href="style.css">
+
+  <!-- Icono de la página -->
+  <link
+    rel="icon"
+    href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='85'%3E%E2%9C%A6%3C/text%3E%3C/svg%3E"
+  >
 </head>
 
 <body>
-  <main class="container">
 
-    <section id="welcome">
-      <p id="edition">UNA EDICIÓN ESPECIAL DE NAVIDAD</p>
-      <h1 id="main-title">31 días contigo</h1>
-      <p id="subtitle">
-        Diciembre tiene algo especial reservado para ti.
-      </p>
+  <!-- =================================
+       FONDO DECORATIVO
+  ================================== -->
 
-      <div class="login">
-        <label for="password">Tu contraseña</label>
-        <input
-          type="password"
-          id="password"
-          placeholder="Escribe tu contraseña"
-          autocomplete="off"
-        >
-        <button id="enter-button" type="button">
-          Descubrir mi calendario
-        </button>
-        <p id="login-message"></p>
+  <div class="background-decoration" aria-hidden="true">
+    <div class="decoration decoration-one"></div>
+    <div class="decoration decoration-two"></div>
+    <div class="decoration decoration-three"></div>
+  </div>
+
+  <!-- =================================
+       APLICACIÓN PRINCIPAL
+  ================================== -->
+
+  <main class="container" id="app">
+
+    <!-- =================================
+         PORTADA / BIENVENIDA
+    ================================== -->
+
+    <section
+      id="welcome"
+      class="welcome-screen"
+      aria-labelledby="main-title"
+    >
+
+      <div class="welcome-content">
+
+        <!-- Identidad del calendario -->
+        <div class="edition-wrapper">
+          <span class="edition-line" aria-hidden="true"></span>
+
+          <p id="edition" class="edition">
+            UNA EDICIÓN ESPECIAL DE NAVIDAD
+          </p>
+
+          <span class="edition-line" aria-hidden="true"></span>
+        </div>
+
+        <!-- Ilustración de portada generada por JavaScript -->
+        <div
+          id="cover-art"
+          class="cover-art"
+          aria-hidden="true"
+        ></div>
+
+        <!-- Título principal -->
+        <h1 id="main-title" class="main-title">
+          31 días contigo
+        </h1>
+
+        <p id="subtitle" class="subtitle">
+          Diciembre tiene algo especial reservado para ti.
+        </p>
+
+        <div class="welcome-divider" aria-hidden="true">
+          <span>✦</span>
+        </div>
+
+        <!-- Acceso al calendario -->
+        <div class="login">
+
+          <div class="login-heading">
+            <h2 id="login-title">Tu pequeño rincón especial</h2>
+
+            <p id="login-description">
+              Hay sorpresas esperando por ti.
+            </p>
+          </div>
+
+          <form id="login-form" autocomplete="on">
+
+            <label for="password" id="password-label">
+              Tu contraseña
+            </label>
+
+            <div class="password-wrapper">
+
+              <input
+                type="password"
+                id="password"
+                name="password"
+                placeholder="Escribe tu contraseña"
+                autocomplete="current-password"
+                aria-describedby="login-message"
+              >
+
+              <button
+                id="toggle-password"
+                class="toggle-password"
+                type="button"
+                aria-label="Mostrar contraseña"
+                aria-pressed="false"
+              >
+                <span aria-hidden="true">◉</span>
+              </button>
+
+            </div>
+
+            <button
+              id="enter-button"
+              class="primary-button"
+              type="submit"
+            >
+              Descubrir mi calendario
+              <span aria-hidden="true">→</span>
+            </button>
+
+            <p
+              id="login-message"
+              class="login-message"
+              role="status"
+              aria-live="polite"
+            ></p>
+
+          </form>
+
+        </div>
+
+        <p class="welcome-footer">
+          Hecho con cariño, especialmente para ti.
+        </p>
+
       </div>
+
     </section>
 
-    
-<section id="calendar-screen" hidden>
-  <h1 id="calendar-title">Tu diciembre especial</h1>
-  <p id="calendar-subtitle">Una sorpresa para cada día.</p>
 
-  <div id="ambient-music" class="ambient-music">
-    <button id="music-button" type="button">
-      ♫ Activar música
-    </button>
-    <span id="music-status">Una melodía para acompañar tu diciembre</span>
-    <div id="music-player-container"></div>
-  </div>
+    <!-- =================================
+         CALENDARIO PRINCIPAL
+    ================================== -->
 
-  <section id="calendar" class="calendar"></section>
-</section>
+    <section
+      id="calendar-screen"
+      class="calendar-screen"
+      aria-labelledby="calendar-title"
+      hidden
+    >
 
-<!-- VENTANA DE SORPRESAS -->
-<div id="surprise-modal" class="modal" hidden>
-  <div class="modal-content">
-    <button id="close-modal" class="close-modal" type="button" aria-label="Cerrar">×</button>
-    <p id="modal-day" class="modal-day"></p>
-    <h2 id="modal-title"></h2>
-    <div id="modal-body"></div>
-  </div>
-</div>
+      <!-- Encabezado -->
+      <header class="calendar-header">
+
+        <p class="calendar-eyebrow">
+          UNA SORPRESA PARA CADA DÍA
+        </p>
+
+        <h1 id="calendar-title" class="calendar-title">
+          Tu diciembre especial
+        </h1>
+
+        <p id="calendar-subtitle" class="calendar-subtitle">
+          31 días llenos de pequeños momentos.
+        </p>
+
+        <div class="calendar-decoration" aria-hidden="true">
+          ✦
+        </div>
+
+      </header>
+
+
+      <!-- =================================
+           MÚSICA AMBIENTAL
+      ================================== -->
+
+      <section
+        id="ambient-music"
+        class="ambient-music"
+        aria-label="Música ambiental"
+      >
+
+        <div class="music-information">
+
+          <span class="music-icon" aria-hidden="true">
+            ♫
+          </span>
+
+          <div class="music-text">
+
+            <p class="music-title">
+              Nuestra banda sonora
+            </p>
+
+            <p
+              id="music-status"
+              class="music-status"
+              role="status"
+              aria-live="polite"
+            >
+              Una melodía para acompañar tu diciembre.
+            </p>
+
+          </div>
+
+        </div>
+
+        <button
+          id="music-button"
+          class="music-button"
+          type="button"
+          aria-pressed="false"
+        >
+          <span aria-hidden="true">♫</span>
+          <span id="music-button-text">Activar música</span>
+        </button>
+
+        <!-- Reproductor ambiental -->
+        <div
+          id="music-player-container"
+          class="music-player-container"
+        ></div>
+
+      </section>
+
+
+      <!-- =================================
+           INDICACIONES DEL CALENDARIO
+      ================================== -->
+
+      <div class="calendar-instructions">
+
+        <span class="instruction-icon" aria-hidden="true">
+          ✧
+        </span>
+
+        <p>
+          Cada día guarda una sorpresa.
+          Las puertas se abrirán a medida que avance diciembre.
+        </p>
+
+      </div>
+
+
+      <!-- =================================
+           PROGRESO DEL CALENDARIO
+      ================================== -->
+
+      <section
+        class="calendar-progress"
+        aria-label="Progreso del calendario"
+      >
+
+        <div class="progress-information">
+
+          <span id="progress-label">
+            Tu recorrido
+          </span>
+
+          <span id="progress-count">
+            0 de 31 días
+          </span>
+
+        </div>
+
+        <div
+          class="progress-track"
+          role="progressbar"
+          aria-label="Días desbloqueados"
+          aria-valuemin="0"
+          aria-valuemax="31"
+          aria-valuenow="0"
+          id="progress-bar"
+        >
+
+          <div
+            id="progress-fill"
+            class="progress-fill"
+          ></div>
+
+        </div>
+
+      </section>
+
+
+      <!-- =================================
+           CUADRÍCULA DE LOS 31 DÍAS
+      ================================== -->
+
+      <section
+        id="calendar"
+        class="calendar"
+        aria-label="Calendario de adviento"
+      >
+        <!-- Las 31 puertas serán creadas por JavaScript -->
+      </section>
+
+
+      <!-- =================================
+           PIE DEL CALENDARIO
+      ================================== -->
+
+      <footer class="calendar-footer">
+
+        <div class="footer-symbol" aria-hidden="true">
+          ✦
+        </div>
+
+        <p id="footer-message">
+          Los mejores regalos no siempre vienen envueltos.
+        </p>
+
+        <p class="footer-year">
+          DICIEMBRE · 2026
+        </p>
+
+      </footer>
+
+    </section>
 
   </main>
 
-  <script src="script.js"></script>
+
+  <!-- =================================
+       VENTANA DE REGALOS / MODAL
+  ================================== -->
+
+  <div
+    id="surprise-modal"
+    class="modal"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="modal-title"
+    aria-describedby="modal-day"
+    hidden
+  >
+
+    <div class="modal-backdrop" aria-hidden="true"></div>
+
+    <article
+      class="modal-content"
+      role="document"
+    >
+
+      <!-- Botón de cierre -->
+      <button
+        id="close-modal"
+        class="close-modal"
+        type="button"
+        aria-label="Cerrar sorpresa"
+      >
+        <span aria-hidden="true">×</span>
+      </button>
+
+
+      <!-- Decoración -->
+      <div class="modal-decoration" aria-hidden="true">
+        ✧
+      </div>
+
+
+      <!-- Identificación del regalo -->
+      <header class="modal-header">
+
+        <p id="modal-day" class="modal-day">
+          DÍA 1 · DICIEMBRE 2026
+        </p>
+
+        <h2 id="modal-title" class="modal-title">
+          Una sorpresa para ti
+        </h2>
+
+        <div class="modal-divider" aria-hidden="true">
+          <span>✦</span>
+        </div>
+
+      </header>
+
+
+      <!-- Contenido dinámico del regalo -->
+      <div
+        id="modal-body"
+        class="modal-body"
+        tabindex="0"
+      >
+        <!--
+          JavaScript insertará aquí:
+          - Cartas
+          - Mensajes
+          - Fotografías
+          - Galerías
+          - Canciones
+          - Videos
+          - Cupones
+          - Enlaces
+          - Sorpresas especiales
+        -->
+      </div>
+
+
+      <!-- Pie de la ventana -->
+      <footer class="modal-footer">
+
+        <p id="modal-footer-message">
+          Un pequeño detalle, hecho para ti.
+        </p>
+
+      </footer>
+
+    </article>
+
+  </div>
+
+
+  <!-- =================================
+       AVISO / NOTIFICACIONES
+  ================================== -->
+
+  <div
+    id="notification"
+    class="notification"
+    role="status"
+    aria-live="polite"
+    hidden
+  ></div>
+
+
+  <!-- =================================
+       SCRIPTS
+  ================================== -->
+
+  <script src="script.js" defer></script>
+
 </body>
 </html>
