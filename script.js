@@ -1,13 +1,9 @@
 
-/* =====================================
-   31 DIAS CONTIGO - SISTEMA DE IDENTIDAD
-===================================== */
+/* 31 DIAS CONTIGO - SISTEMA DE IDENTIDAD */
 
-// Identificar a la persona mediante el enlace
 const parametros = new URLSearchParams(window.location.search);
 const destinataria = parametros.get("para") || "milena";
 
-// Personalidad de cada calendario
 const calendarios = {
   milena: {
     nombre: "Milena",
@@ -18,7 +14,6 @@ const calendarios = {
     simbolo: "✦",
     detalle: "Un álbum de recuerdos"
   },
-
   laura: {
     nombre: "Laura",
     tema: "theme-laura",
@@ -28,7 +23,6 @@ const calendarios = {
     simbolo: "❀",
     detalle: "Un diario de momentos especiales"
   },
-
   luisa: {
     nombre: "Luisa",
     tema: "theme-luisa",
@@ -40,20 +34,17 @@ const calendarios = {
   }
 };
 
-// Seleccionar el calendario correspondiente
 const persona = calendarios[destinataria] || calendarios.milena;
 
-// Aplicar identidad visual
 document.body.classList.add(persona.tema);
-
-// Personalizar portada
 document.title = persona.titulo + " | Diciembre 2026";
 
 document.getElementById("edition").textContent = persona.edicion;
 document.getElementById("main-title").textContent = persona.titulo;
 document.getElementById("subtitle").textContent = persona.subtitulo;
 
-// Crear elemento decorativo de portada
+/* PORTADA */
+
 const portada = document.createElement("div");
 portada.className = "cover-art";
 portada.innerHTML = `
@@ -64,10 +55,10 @@ portada.innerHTML = `
 const bienvenida = document.getElementById("welcome");
 bienvenida.insertBefore(portada, bienvenida.firstChild);
 
-// Preparar acceso de demostración
+/* ACCESO DE DEMOSTRACIÓN */
+
 const password = document.getElementById("password");
 const enterButton = document.getElementById("enter-button");
-const loginMessage = document.getElementById("login-message");
 
 password.disabled = true;
 password.placeholder = "Acceso privado en preparación";
@@ -77,8 +68,6 @@ document.querySelector(".login label").textContent =
 
 enterButton.textContent = "Ver calendario de prueba";
 
-// IMPORTANTE: este acceso es solo una demostración.
-// Todavía no existe autenticación ni cifrado.
 enterButton.addEventListener("click", () => {
   document.getElementById("welcome").hidden = true;
   document.getElementById("calendar-screen").hidden = false;
@@ -88,12 +77,55 @@ enterButton.addEventListener("click", () => {
 
   document.getElementById("calendar-subtitle").textContent =
     persona.detalle + " · 31 días especiales";
-
-  loginMessage.textContent = "";
 });
 
-// Crear las 31 casillas
+/* VENTANA DE SORPRESAS */
+
+const modal = document.getElementById("surprise-modal");
+const closeModalButton = document.getElementById("close-modal");
+const modalDay = document.getElementById("modal-day");
+const modalTitle = document.getElementById("modal-title");
+const modalBody = document.getElementById("modal-body");
+
+function abrirSorpresa(dia) {
+  modalDay.textContent = "DÍA " + dia + " · DICIEMBRE 2026";
+  modalTitle.textContent = "Una pequeña sorpresa";
+
+  modalBody.textContent =
+    "Estamos preparando algo especial para ti. " +
+    "Pronto encontrarás aquí una sorpresa hecha pensando en ti.";
+
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+function cerrarSorpresa() {
+  modal.hidden = true;
+  document.body.style.overflow = "";
+}
+
+closeModalButton.addEventListener("click", cerrarSorpresa);
+
+modal.addEventListener("click", (evento) => {
+  if (evento.target === modal) {
+    cerrarSorpresa();
+  }
+});
+
+document.addEventListener("keydown", (evento) => {
+  if (evento.key === "Escape" && !modal.hidden) {
+    cerrarSorpresa();
+  }
+});
+
+/* CALENDARIO Y FECHAS */
+
 const calendar = document.getElementById("calendar");
+
+/* MODO DE PRUEBA TEMPORAL.
+   Cambia a false antes de entregar los calendarios. */
+
+const modoPrueba = true;
 
 const fechaPartes = new Intl.DateTimeFormat("en-US", {
   timeZone: "America/Bogota",
@@ -122,6 +154,7 @@ for (let dia = 1; dia <= 31; dia++) {
   puerta.type = "button";
 
   const disponible =
+    modoPrueba ||
     anioActual > 2026 ||
     (anioActual === 2026 && mesActual > 12) ||
     (anioActual === 2026 && mesActual === 12 && dia <= diaActual);
@@ -130,7 +163,7 @@ for (let dia = 1; dia <= 31; dia++) {
 
   if (disponible) {
     puerta.addEventListener("click", () => {
-      alert("¡Pronto descubrirás tu sorpresa del día " + dia + "!");
+      abrirSorpresa(dia);
     });
   }
 
