@@ -147,30 +147,51 @@ musicButton.addEventListener("click", () => {
    CONTENIDO DE LOS REGALOS
    ===================================== */
 
+
 const regalos = {
   milena: {
     1: {
-      titulo: "Un comienzo especial",
+      titulo: "Prueba de regalos",
       elementos: [
         {
           tipo: "carta",
-          contenido: "Aquí irá el primer mensaje especial para Milena."
+          contenido: "Esta es una prueba de carta."
         },
         {
-  tipo: "foto",
-  contenido: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800"
-}
+          tipo: "texto",
+          contenido: "Este es un mensaje adicional."
+        },
+        {
+          tipo: "foto",
+          contenido: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800",
+          descripcion: "Paisaje de prueba"
+        },
+        {
+          tipo: "cupon",
+          contenido: "Una tarde especial",
+          descripcion: "Una experiencia para compartir.",
+          nota: "Canjeable cuando quieras."
+        },
+        {
+          tipo: "video",
+          contenido: "https://www.youtube.com/watch?v=MKHtXovAejs"
+        },
+        {
+          tipo: "enlace",
+          contenido: "https://www.youtube.com/",
+          texto: "Abrir YouTube"
+        }
       ]
     }
   },
 
   laura: {
     1: {
-      titulo: "Una pequeña casualidad",
+      titulo: "Prueba de Laura",
       elementos: [
         {
           tipo: "carta",
-          contenido: "Aquí irá el primer mensaje especial para Laura."
+          contenido: "El sistema también funciona para Laura."
         }
       ]
     }
@@ -178,16 +199,17 @@ const regalos = {
 
   luisa: {
     1: {
-      titulo: "Una posibilidad interesante",
+      titulo: "Prueba de Luisa",
       elementos: [
         {
           tipo: "carta",
-          contenido: "Aquí irá el primer mensaje especial para Luisa."
+          contenido: "El sistema también funciona para Luisa."
         }
       ]
     }
   }
 };
+
 
 /* VENTANA DE SORPRESAS */
 
