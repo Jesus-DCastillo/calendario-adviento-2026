@@ -93,9 +93,9 @@ const regalos = {
           contenido: "Aquí irá el primer mensaje especial para Milena."
         },
         {
-          tipo: "foto",
-          contenido: "Aquí irá la primera fotografía."
-        }
+  tipo: "foto",
+  contenido: "https://images.unsplash.com/photo-1470252649378-9c29740c9fa8?w=800"
+}
       ]
     }
   },
