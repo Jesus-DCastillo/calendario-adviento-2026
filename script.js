@@ -2,7 +2,7 @@
 /* 31 DIAS CONTIGO - SISTEMA DE IDENTIDAD */
 
 const parametros = new URLSearchParams(window.location.search);
-const destinataria = parametros.get("para") || "milena";
+const destinatariaSolicitada = parametros.get("para") || "milena";
 
 const calendarios = {
   milena: {
@@ -37,7 +37,11 @@ const calendarios = {
   }
 };
 
-const persona = calendarios[destinataria] || calendarios.milena;
+const destinataria = calendarios[destinatariaSolicitada]
+  ? destinatariaSolicitada
+  : "milena";
+
+const persona = calendarios[destinataria];
 
 document.body.classList.add(persona.tema);
 document.title = persona.titulo + " | Diciembre 2026";
@@ -144,15 +148,19 @@ musicButton.addEventListener("click", () => {
 });
 
 
+
 /* =====================================
    CONTENIDO DE LOS REGALOS
    ESTRUCTURA DE LOS 93 REGALOS
    ===================================== */
 
-// Crea automáticamente los 31 días de un calendario
-function crearDiasBase() {
-  return Object.fromEntries(
+// Genera automáticamente los 31 días
+// y permite personalizar cualquier día.
+function crearDiasBase(personalizados = {}) {
+
+  const dias = Object.fromEntries(
     Array.from({ length: 31 }, (_, indice) => {
+
       const dia = indice + 1;
 
       let titulo = "Una sorpresa para ti";
@@ -168,7 +176,7 @@ function crearDiasBase() {
       return [
         dia,
         {
-          titulo: titulo,
+          titulo,
           elementos: [
             {
               tipo: "texto",
@@ -179,14 +187,68 @@ function crearDiasBase() {
       ];
     })
   );
+
+  // Sustituye los días que tengan regalos personalizados
+  return {
+    ...dias,
+    ...personalizados
+  };
 }
 
-// Los tres calendarios
+/* =====================================
+   LOS TRES CALENDARIOS
+   ===================================== */
+
 const regalos = {
-  milena: crearDiasBase(),
-  laura: crearDiasBase(),
-  luisa: crearDiasBase()
+
+  milena: crearDiasBase({
+
+    1: {
+      titulo: "Nuestro primer capítulo",
+      elementos: [
+        {
+          tipo: "carta",
+          contenido: "Aquí irá una carta especial para Milena."
+        },
+        {
+          tipo: "texto",
+          contenido: "Y este será un pequeño mensaje adicional."
+        }
+      ]
+    }
+
+  }),
+
+  laura: crearDiasBase({
+
+    1: {
+      titulo: "Una bonita casualidad",
+      elementos: [
+        {
+          tipo: "carta",
+          contenido: "Aquí irá una carta especial para Laura."
+        }
+      ]
+    }
+
+  }),
+
+  luisa: crearDiasBase({
+
+    1: {
+      titulo: "El comienzo de algo curioso",
+      elementos: [
+        {
+          tipo: "carta",
+          contenido: "Aquí irá una carta especial para Luisa."
+        }
+      ]
+    }
+
+  })
+
 };
+
 
 
 /* VENTANA DE SORPRESAS */
