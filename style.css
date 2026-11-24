@@ -544,3 +544,80 @@ body.theme-luisa {
     width: 100%;
   }
 }
+
+/* =====================================
+   OTROS TIPOS DE REGALOS
+   ===================================== */
+
+/* Mensajes y textos especiales */
+
+.gift-text {
+  margin: 18px 0;
+  line-height: 1.8;
+  color: var(--text);
+  white-space: pre-line;
+}
+
+/* Cupones */
+
+.gift-coupon {
+  margin: 22px 0;
+  padding: 24px 18px;
+  border: 2px dashed var(--secondary);
+  border-radius: 16px;
+  background: #88888812;
+  text-align: center;
+}
+
+.gift-coupon h3 {
+  margin-bottom: 12px;
+  color: var(--primary);
+  font-size: 1.3rem;
+}
+
+.gift-coupon p {
+  color: var(--text);
+  line-height: 1.7;
+}
+
+.gift-coupon small {
+  display: block;
+  margin-top: 15px;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+/* Videos y canciones */
+
+.gift-media {
+  display: block;
+  width: 100%;
+  margin: 20px auto;
+  overflow: hidden;
+  border: 0;
+  border-radius: 12px;
+  background: #000;
+}
+
+.gift-media.video {
+  aspect-ratio: 16 / 9;
+  height: auto;
+}
+
+/* Enlaces especiales */
+
+.gift-link {
+  display: inline-block;
+  margin: 15px 0;
+  padding: 10px 20px;
+  border: 1px solid var(--border);
+  border-radius: 25px;
+  color: var(--text);
+  background: var(--door);
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+
+.gift-link:hover {
+  background: var(--door-hover);
+}
