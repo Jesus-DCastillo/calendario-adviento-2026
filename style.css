@@ -478,3 +478,69 @@ body.theme-luisa {
   border: 1px solid var(--border);
   box-shadow: 0 8px 25px #00000020;
 }
+
+/* =====================================
+   REPRODUCTOR DE MÚSICA AMBIENTAL
+   ===================================== */
+
+.ambient-music {
+  width: 100%;
+  max-width: 480px;
+  margin: 25px auto 30px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: 0 8px 25px #00000012;
+  text-align: center;
+}
+
+#music-button {
+  padding: 11px 22px;
+  border: 1px solid var(--border);
+  border-radius: 30px;
+  background: var(--door);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+#music-button:hover {
+  background: var(--door-hover);
+  transform: translateY(-2px);
+}
+
+#music-status {
+  display: block;
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.8rem;
+  line-height: 1.5;
+}
+
+#music-player-container {
+  width: 100%;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 12px;
+}
+
+#music-player-container iframe {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  border-radius: 12px;
+}
+
+@media (max-width: 480px) {
+  .ambient-music {
+    padding: 15px;
+    margin: 20px auto 25px;
+  }
+
+  #music-button {
+    width: 100%;
+  }
+}
