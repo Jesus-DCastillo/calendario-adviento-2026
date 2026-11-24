@@ -101,7 +101,7 @@ musicButton.addEventListener("click", () => {
 
     musicButton.textContent = "♫ Activar música";
     musicStatus.textContent =
-      "La música está pausada. Puedes volver a escucharla cuando quieras.";
+  "La música está detenida. Puedes volver a escucharla cuando quieras.";
 
     return;
   }
