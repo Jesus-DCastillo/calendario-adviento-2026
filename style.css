@@ -354,3 +354,100 @@ body.theme-luisa {
 .theme-luisa .cover-symbol {
   color: var(--accent);
 }
+
+/* VENTANA DE SORPRESAS */
+
+.modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: #00000080;
+  backdrop-filter: blur(7px);
+  animation: appear 0.3s ease;
+}
+
+.modal-content {
+  position: relative;
+  width: 100%;
+  max-width: 480px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 38px 28px 30px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  color: var(--text);
+  text-align: center;
+  box-shadow: 0 20px 70px #00000050;
+  animation: modalAppear 0.35s ease;
+}
+
+.close-modal {
+  position: absolute;
+  top: 12px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text);
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.close-modal:hover {
+  background: #88888820;
+}
+
+.modal-day {
+  margin-bottom: 10px;
+  color: var(--secondary);
+  font-size: 0.75rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+.modal-content h2 {
+  margin-bottom: 20px;
+  color: var(--primary);
+  font-size: 1.8rem;
+}
+
+#modal-body {
+  line-height: 1.8;
+  color: var(--text);
+}
+
+#modal-body img {
+  width: 100%;
+  max-height: 300px;
+  object-fit: cover;
+  border-radius: 12px;
+  margin-top: 15px;
+}
+
+@keyframes modalAppear {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-content {
+    padding: 38px 20px 24px;
+  }
+
+  .modal-content h2 {
+    font-size: 1.5rem;
+  }
+}
