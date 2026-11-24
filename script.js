@@ -155,16 +155,26 @@ function abrirSorpresa(dia) {
     regalo.elementos.forEach(elemento => {
       const contenido = document.createElement("p");
 
-      // Mostrar el contenido según su tipo
-      if (elemento.tipo === "carta") {
-        contenido.textContent = elemento.contenido;
-      } else if (elemento.tipo === "foto") {
-        contenido.textContent = "📷 " + elemento.contenido;
-      } else {
-        contenido.textContent = elemento.contenido;
-      }
+     // Mostrar el contenido según su tipo
+if (elemento.tipo === "carta") {
+  contenido.textContent = elemento.contenido;
+  contenido.className = "gift-letter";
 
-      modalBody.appendChild(contenido);
+} else if (elemento.tipo === "foto") {
+  const imagen = document.createElement("img");
+
+  imagen.src = elemento.contenido;
+  imagen.alt = "Fotografía de la sorpresa";
+  imagen.className = "gift-photo";
+
+  modalBody.appendChild(imagen);
+  return;
+
+} else {
+  contenido.textContent = elemento.contenido;
+}
+
+modalBody.appendChild(contenido);
     });
   }
 
