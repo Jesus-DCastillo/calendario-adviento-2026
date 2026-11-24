@@ -170,6 +170,20 @@ if (elemento.tipo === "carta") {
   modalBody.appendChild(imagen);
   return;
 
+} else if (elemento.tipo === "cancion") {
+  const reproductor = document.createElement("iframe");
+
+  reproductor.src = elemento.contenido;
+  reproductor.width = "100%";
+  reproductor.height = "152";
+  reproductor.style.border = "0";
+  reproductor.style.borderRadius = "12px";
+  reproductor.allow = "autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture";
+  reproductor.loading = "lazy";
+
+  modalBody.appendChild(reproductor);
+  return;
+
 } else {
   contenido.textContent = elemento.contenido;
 }
