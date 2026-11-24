@@ -6,8 +6,9 @@ const destinataria = parametros.get("para") || "milena";
 
 const calendarios = {
   milena: {
-    nombre: "Milena",
-    tema: "theme-milena",
+  nombre: "Milena",
+  tema: "theme-milena",
+  soundtrack: "PLAYLIST_MILENA",
     edicion: "UNA AMISTAD, MUCHOS CAPÍTULOS",
     titulo: "31 capítulos de nosotros",
     subtitulo: "Desde el primer semestre hasta todas las historias que todavía nos quedan por vivir.",
@@ -17,6 +18,7 @@ const calendarios = {
   laura: {
     nombre: "Laura",
     tema: "theme-laura",
+    soundtrack: "PLAYLIST_LAURA",
     edicion: "PEQUEÑOS DETALLES, GRANDES RECUERDOS",
     titulo: "31 pequeñas casualidades",
     subtitulo: "Porque algunas personas hacen más bonito el camino.",
@@ -26,6 +28,7 @@ const calendarios = {
   luisa: {
     nombre: "Luisa",
     tema: "theme-luisa",
+    soundtrack: "PLAYLIST_LUISA",
     edicion: "UNA HISTORIA QUE TODAVÍA NO SE HA ESCRITO",
     titulo: "31 razones para sospechar...",
     subtitulo: "Que nuestro futuro hipotético tiene demasiados capítulos.",
