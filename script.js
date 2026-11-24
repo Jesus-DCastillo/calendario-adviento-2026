@@ -81,6 +81,66 @@ enterButton.addEventListener("click", () => {
   document.getElementById("calendar-subtitle").textContent =
     persona.detalle + " · 31 días especiales";
 });
+/* =====================================
+   MÚSICA AMBIENTAL NAVIDEÑA
+   ===================================== */
+
+const musicButton = document.getElementById("music-button");
+const musicStatus = document.getElementById("music-status");
+const musicContainer = document.getElementById("music-player-container");
+
+let musicaActiva = false;
+
+musicButton.addEventListener("click", () => {
+
+  // Si la música está sonando, detenerla
+  if (musicaActiva) {
+    musicContainer.innerHTML = "";
+    musicaActiva = false;
+
+    musicButton.textContent = "♫ Activar música";
+    musicStatus.textContent =
+      "La música está pausada. Puedes volver a escucharla cuando quieras.";
+
+    return;
+  }
+
+  // Obtener la lista correspondiente a la destinataria
+  const playlistId = persona.soundtrack;
+
+  // Comprobar si ya tenemos una lista real
+  if (!playlistId || playlistId.startsWith("PLAYLIST_")) {
+    musicStatus.textContent =
+      "Estamos preparando tu soundtrack navideño.";
+
+    return;
+  }
+
+  // Crear el reproductor de YouTube
+  const reproductor = document.createElement("iframe");
+
+  reproductor.src =
+    "https://www.youtube-nocookie.com/embed/videoseries?list=" +
+    encodeURIComponent(playlistId) +
+    "&autoplay=1";
+
+  reproductor.width = "100%";
+  reproductor.height = "80";
+  reproductor.title = "Soundtrack navideño";
+  reproductor.allow =
+    "autoplay; encrypted-media; picture-in-picture";
+  reproductor.loading = "lazy";
+  reproductor.style.border = "0";
+  reproductor.style.borderRadius = "12px";
+
+  musicContainer.appendChild(reproductor);
+
+  musicaActiva = true;
+
+  musicButton.textContent = "♫ Detener música";
+  musicStatus.textContent =
+    "Tu soundtrack navideño está sonando.";
+});
 
 /* =====================================
    CONTENIDO DE LOS REGALOS
