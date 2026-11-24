@@ -8,7 +8,7 @@ const calendarios = {
   milena: {
   nombre: "Milena",
   tema: "theme-milena",
-  soundtrack: "PLAYLIST_MILENA",
+  soundtrack: "MKHtXovAejs",
     edicion: "UNA AMISTAD, MUCHOS CAPÍTULOS",
     titulo: "31 capítulos de nosotros",
     subtitulo: "Desde el primer semestre hasta todas las historias que todavía nos quedan por vivir.",
@@ -18,7 +18,7 @@ const calendarios = {
   laura: {
     nombre: "Laura",
     tema: "theme-laura",
-    soundtrack: "PLAYLIST_LAURA",
+    soundtrack: "3WsufJe4YN8",
     edicion: "PEQUEÑOS DETALLES, GRANDES RECUERDOS",
     titulo: "31 pequeñas casualidades",
     subtitulo: "Porque algunas personas hacen más bonito el camino.",
@@ -28,7 +28,7 @@ const calendarios = {
   luisa: {
     nombre: "Luisa",
     tema: "theme-luisa",
-    soundtrack: "PLAYLIST_LUISA",
+    soundtrack: "420h4EyO01w",
     edicion: "UNA HISTORIA QUE TODAVÍA NO SE HA ESCRITO",
     titulo: "31 razones para sospechar...",
     subtitulo: "Que nuestro futuro hipotético tiene demasiados capítulos.",
@@ -85,6 +85,10 @@ enterButton.addEventListener("click", () => {
    MÚSICA AMBIENTAL NAVIDEÑA
    ===================================== */
 
+/* =====================================
+   MÚSICA AMBIENTAL NAVIDEÑA
+   ===================================== */
+
 const musicButton = document.getElementById("music-button");
 const musicStatus = document.getElementById("music-status");
 const musicContainer = document.getElementById("music-player-container");
@@ -93,7 +97,7 @@ let musicaActiva = false;
 
 musicButton.addEventListener("click", () => {
 
-  // Si la música está sonando, detenerla
+  // Detener la música si ya está reproduciéndose
   if (musicaActiva) {
     musicContainer.innerHTML = "";
     musicaActiva = false;
@@ -105,13 +109,12 @@ musicButton.addEventListener("click", () => {
     return;
   }
 
-  // Obtener la lista correspondiente a la destinataria
-  const playlistId = persona.soundtrack;
+  // Obtener el video correspondiente a cada persona
+  const videoId = persona.soundtrack;
 
-  // Comprobar si ya tenemos una lista real
-  if (!playlistId || playlistId.startsWith("PLAYLIST_")) {
+  if (!videoId) {
     musicStatus.textContent =
-      "Estamos preparando tu soundtrack navideño.";
+      "No se encontró el soundtrack navideño.";
 
     return;
   }
@@ -120,15 +123,16 @@ musicButton.addEventListener("click", () => {
   const reproductor = document.createElement("iframe");
 
   reproductor.src =
-    "https://www.youtube-nocookie.com/embed/videoseries?list=" +
-    encodeURIComponent(playlistId) +
-    "&autoplay=1";
+    "https://www.youtube-nocookie.com/embed/" +
+    encodeURIComponent(videoId) +
+    "?autoplay=1&controls=1&rel=0";
 
   reproductor.width = "100%";
-  reproductor.height = "80";
+  reproductor.height = "180";
   reproductor.title = "Soundtrack navideño";
   reproductor.allow =
     "autoplay; encrypted-media; picture-in-picture";
+  reproductor.allowFullscreen = true;
   reproductor.loading = "lazy";
   reproductor.style.border = "0";
   reproductor.style.borderRadius = "12px";
