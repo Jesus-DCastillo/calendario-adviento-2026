@@ -134,13 +134,41 @@ const modalTitle = document.getElementById("modal-title");
 const modalBody = document.getElementById("modal-body");
 
 function abrirSorpresa(dia) {
+  // Buscar el regalo de la persona y el día seleccionado
+  const regalo = regalos[destinataria]?.[dia];
+
+  // Mostrar el número del día
   modalDay.textContent = "DÍA " + dia + " · DICIEMBRE 2026";
-  modalTitle.textContent = "Una pequeña sorpresa";
 
-  modalBody.textContent =
-    "Estamos preparando algo especial para ti. " +
-    "Pronto encontrarás aquí una sorpresa hecha pensando en ti.";
+  // Si todavía no existe un regalo para ese día
+  if (!regalo) {
+    modalTitle.textContent = "Una sorpresa en preparación";
+    modalBody.textContent = "Estamos preparando algo especial para ti.";
+  } else {
+    // Mostrar el título del regalo
+    modalTitle.textContent = regalo.titulo;
 
+    // Limpiar el contenido anterior
+    modalBody.innerHTML = "";
+
+    // Recorrer todos los elementos del regalo
+    regalo.elementos.forEach(elemento => {
+      const contenido = document.createElement("p");
+
+      // Mostrar el contenido según su tipo
+      if (elemento.tipo === "carta") {
+        contenido.textContent = elemento.contenido;
+      } else if (elemento.tipo === "foto") {
+        contenido.textContent = "📷 " + elemento.contenido;
+      } else {
+        contenido.textContent = elemento.contenido;
+      }
+
+      modalBody.appendChild(contenido);
+    });
+  }
+
+  // Abrir la ventana
   modal.hidden = false;
   document.body.style.overflow = "hidden";
 }
