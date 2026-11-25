@@ -1,1659 +1,835 @@
-
 /* =========================================================
-   31 DÍAS CONTIGO
-   SISTEMA PRINCIPAL · DICIEMBRE 2026
-   Tres calendarios · 93 regalos · Experiencia personalizada
+   31 DÍAS CONTIGO — SCRIPT PRINCIPAL
+   Tres experiencias: Milena, Laurel y Cata
+   Diciembre de 2026
 ========================================================= */
 
-"use strict";
-
-
-/* =========================================================
-   01. CONFIGURACIÓN E IDENTIDAD
-========================================================= */
-
-const parametros = new URLSearchParams(window.location.search);
-
-const destinatariaSolicitada = parametros.get("para") || "milena";
-
-const calendarios = {
-
-  milena: {
-    nombre: "Milena",
-    tema: "theme-milena",
-    soundtrack: "MKHtXovAejs",
-
-    edicion: "UNA AMISTAD, MUCHOS CAPÍTULOS",
-    titulo: "31 capítulos de nosotros",
-    subtitulo:
-      "Desde el primer semestre hasta todas las historias que todavía nos quedan por vivir.",
-
-    simbolo: "✦",
-    detalle: "Un álbum de recuerdos",
-
-    pie:
-      "Los mejores recuerdos siempre encuentran la forma de quedarse.",
-
-    mensajeFinal:
-      "Por todos los capítulos que ya vivimos y los que todavía nos faltan."
-  },
-
-  laura: {
-    nombre: "Laura",
-    tema: "theme-laura",
-    soundtrack: "3WsufJe4YN8",
-
-    edicion: "PEQUEÑOS DETALLES, GRANDES RECUERDOS",
-    titulo: "31 pequeñas casualidades",
-    subtitulo:
-      "Porque algunas personas hacen más bonito el camino.",
-
-    simbolo: "❀",
-    detalle: "Un diario de momentos especiales",
-
-    pie:
-      "A veces los momentos más sencillos terminan siendo los favoritos.",
-
-    mensajeFinal:
-      "Por más conversaciones, películas y planes que todavía nos esperan."
-  },
-
-  luisa: {
-    nombre: "Luisa",
-    tema: "theme-luisa",
-    soundtrack: "420h4EyO01w",
-
-    edicion: "UNA HISTORIA QUE TODAVÍA NO SE HA ESCRITO",
-    titulo: "31 razones para sospechar...",
-    subtitulo:
-      "Que nuestro futuro hipotético tiene demasiados capítulos.",
-
-    simbolo: "✧",
-    detalle: "Una colección de posibilidades",
-
-    pie:
-      "Hay historias que todavía no tienen título, pero ya tienen potencial.",
-
-    mensajeFinal:
-      "Por las casualidades, las conversaciones y las posibilidades."
-  }
-
-};
-
-const destinataria = Object.hasOwn(
-  calendarios,
-  destinatariaSolicitada
-)
-  ? destinatariaSolicitada
-  : "milena";
-
-const persona = calendarios[destinataria];
-
-
-/* =========================================================
-   02. REFERENCIAS HTML
-========================================================= */
-
-const $ = (selector) => document.querySelector(selector);
-
-const welcome = $("#welcome");
-const calendarScreen = $("#calendar-screen");
-
-const loginForm = $("#login-form");
-const passwordInput = $("#password");
-const togglePassword = $("#toggle-password");
-const loginMessage = $("#login-message");
-const enterButton = $("#enter-button");
-
-const coverArt = $("#cover-art");
-
-const calendar = $("#calendar");
-const calendarTitle = $("#calendar-title");
-const calendarSubtitle = $("#calendar-subtitle");
-
-const progressBar = $("#progress-bar");
-const progressFill = $("#progress-fill");
-const progressCount = $("#progress-count");
-const progressLabel = $("#progress-label");
-
-const musicButton = $("#music-button");
-const musicButtonText = $("#music-button-text");
-const musicStatus = $("#music-status");
-const musicContainer = $("#music-player-container");
-
-const modal = $("#surprise-modal");
-const modalContent = $(".modal-content");
-const closeModalButton = $("#close-modal");
-const modalDay = $("#modal-day");
-const modalTitle = $("#modal-title");
-const modalBody = $("#modal-body");
-const modalFooterMessage = $("#modal-footer-message");
-
-const notification = $("#notification");
-
-
-/* =========================================================
-   03. VALIDACIÓN DE ELEMENTOS HTML
-========================================================= */
-
-const elementosObligatorios = [
-  welcome,
-  calendarScreen,
-  loginForm,
-  passwordInput,
-  togglePassword,
-  enterButton,
-  coverArt,
-  calendar,
-  calendarTitle,
-  calendarSubtitle,
-  musicButton,
-  musicStatus,
-  musicContainer,
-  modal,
-  closeModalButton,
-  modalDay,
-  modalTitle,
-  modalBody
-];
-
-if (elementosObligatorios.some(elemento => !elemento)) {
-  throw new Error(
-    "Faltan elementos HTML necesarios. Comprueba index.html."
-  );
-}
-
-
-/* =========================================================
-   04. IDENTIDAD VISUAL DE LA PERSONA
-========================================================= */
-
-document.body.classList.add(persona.tema);
-
-document.title = `${persona.titulo} | Diciembre 2026`;
-
-$("#edition").textContent = persona.edicion;
-$("#main-title").textContent = persona.titulo;
-$("#subtitle").textContent = persona.subtitulo;
-
-coverArt.innerHTML = `
-  <span class="cover-symbol">${persona.simbolo}</span>
-  <span class="cover-detail">${persona.detalle}</span>
-`;
-
-$("#footer-message").textContent = persona.pie;
-
-if (modalFooterMessage) {
-  modalFooterMessage.textContent = persona.mensajeFinal;
-}
-
-calendarTitle.textContent = `Diciembre de ${persona.nombre}`;
-
-calendarSubtitle.textContent =
-  `${persona.detalle} · 31 días especiales`;
-
-$("#login-title").textContent =
-  `Un pequeño rincón para ti, ${persona.nombre}`;
-
-$("#login-description").textContent =
-  "Hemos preparado algo especial para acompañarte este diciembre.";
-
-
-/* =========================================================
-   05. MODO DE PRUEBA Y ACCESO
-========================================================= */
-
-/*
-  IMPORTANTE:
-  El acceso actual es una demostración.
-  No constituye autenticación ni protección de contenido.
-
-  El cifrado real se incorporará antes de subir
-  fotografías y mensajes privados.
-*/
-
-const CONFIG = {
-  modoPrueba: true,
-  permitirAccesoSinContrasena: true,
-  anio: 2026,
-  mes: 12,
-  dias: 31
-};
-
-let calendarioAbierto = false;
-
-passwordInput.disabled = true;
-passwordInput.placeholder = "Acceso privado en preparación";
-
-$("#password-label").textContent =
-  "Tu sorpresa está esperando";
-
-togglePassword.hidden = true;
-
-enterButton.textContent = "Descubrir mi calendario";
-
-loginForm.addEventListener("submit", (evento) => {
-  evento.preventDefault();
-
-  if (!CONFIG.permitirAccesoSinContrasena) {
-    loginMessage.textContent =
-      "El sistema de acceso todavía no está configurado.";
-    return;
-  }
-
-  abrirCalendario();
-});
-
-function abrirCalendario() {
-
-  if (calendarioAbierto) return;
-
-  calendarioAbierto = true;
-
-  welcome.hidden = true;
-  calendarScreen.hidden = false;
-
-  actualizarProgreso();
-
-  window.scrollTo({
-    top: 0,
-    behavior: "smooth"
-  });
-}
-
-
-/* =========================================================
-   06. FECHA Y HORA DE COLOMBIA
-========================================================= */
-
-function obtenerFechaColombia() {
-
-  const partes = new Intl.DateTimeFormat("en-US", {
-    timeZone: "America/Bogota",
-    year: "numeric",
-    month: "numeric",
-    day: "numeric"
-  }).formatToParts(new Date());
-
-  const obtener = tipo =>
-    Number(partes.find(parte => parte.type === tipo).value);
-
-  return {
-    anio: obtener("year"),
-    mes: obtener("month"),
-    dia: obtener("day")
+(() => {
+  "use strict";
+
+  /* -------------------------------------------------------
+     1. CONFIGURACIÓN
+  ------------------------------------------------------- */
+
+  // Déjalo en true mientras pruebas. Cámbialo a false antes
+  // de publicar la versión que recibirán ellas.
+  const MODO_PRUEBA = true;
+
+  // Permite probar las celebraciones especiales sin esperar
+  // a Navidad o Año Nuevo:
+  // ?para=milena&demo=navidad
+  // ?para=milena&demo=ano-nuevo
+  const parametros = new URLSearchParams(window.location.search);
+  const destinatariaSolicitada = (parametros.get("para") || "milena").toLowerCase();
+  const demoEspecial = parametros.get("demo");
+
+  const calendarios = {
+    milena: {
+      nombre: "Milena",
+      apodo: "Milena",
+      tema: "theme-milena",
+      soundtrack: "MKHtXovAejs",
+      edicion: "UNA AMISTAD, MUCHOS CAPÍTULOS",
+      titulo: "31 capítulos de nosotros",
+      subtitulo: "Desde el primer semestre hasta todas las historias que todavía nos quedan por vivir.",
+      simbolo: "✦",
+      detalle: "Un álbum de recuerdos",
+      saludoNavidad: "Milena, gracias por tantos capítulos compartidos.",
+      saludoAnio: "Que nos queden muchísimas historias por vivir."
+    },
+    laura: {
+      nombre: "Laura",
+      apodo: "Laurel",
+      tema: "theme-laura",
+      soundtrack: "3WsufJe4YN8",
+      edicion: "PEQUEÑOS DETALLES, GRANDES RECUERDOS",
+      titulo: "31 pequeñas casualidades",
+      subtitulo: "Porque algunas personas hacen más bonito el camino.",
+      simbolo: "❀",
+      detalle: "Un diario de momentos especiales",
+      saludoNavidad: "Laurel, que nunca nos falten las buenas conversaciones y los buenos parches.",
+      saludoAnio: "Que este nuevo año venga con películas, planes y muchas risas."
+    },
+    luisa: {
+      nombre: "Luisa",
+      apodo: "Cata",
+      tema: "theme-luisa",
+      soundtrack: "420h4EyO01w",
+      edicion: "UNA HISTORIA QUE TODAVÍA NO SE HA ESCRITO",
+      titulo: "31 razones para sospechar...",
+      subtitulo: "Que nuestro futuro hipotético tiene demasiados capítulos.",
+      simbolo: "✧",
+      detalle: "Una colección de posibilidades",
+      saludoNavidad: "Cata, espero que esta Navidad te recuerde lo especial que eres.",
+      saludoAnio: "Que el próximo capítulo traiga buenas sorpresas. Sin adelantar conclusiones."
+    }
   };
-}
 
-function diaDesbloqueado(dia) {
-
-  if (CONFIG.modoPrueba) {
-    return true;
-  }
-
-  const fecha = obtenerFechaColombia();
-
-  if (fecha.anio > CONFIG.anio) {
-    return true;
-  }
-
-  if (fecha.anio < CONFIG.anio) {
-    return false;
-  }
-
-  if (fecha.mes > CONFIG.mes) {
-    return true;
-  }
-
-  if (fecha.mes < CONFIG.mes) {
-    return false;
-  }
-
-  return dia <= fecha.dia;
-}
-
-
-/* =========================================================
-   07. CONTENIDO ORIGINAL DE LOS 93 REGALOS
-========================================================= */
-
-/*
-  Cada persona tiene 31 mensajes diferentes.
-
-  Los regalos se generan automáticamente combinando:
-  - Mensajes
-  - Cartas
-  - Reflexiones
-  - Cupones
-  - Canciones
-  - Videos
-  - Enlaces
-
-  Los textos son genéricos y se pueden personalizar.
-*/
-
-
-const mensajes = {
-
-  milena: [
-
-    "Hay amistades que empiezan como una casualidad y terminan convirtiéndose en parte de la historia de uno. Qué curioso que la nuestra comenzara en la universidad.",
-
-    "No todas las personas conocen nuestras versiones buenas, malas, cansadas y dramáticas. Tú has conocido bastantes de las mías. Eso ya es bastante mérito.",
-
-    "Si algo he aprendido de nuestra amistad es que no hace falta estar de acuerdo en todo para seguir estando presentes.",
-
-    "Hay lugares que se sienten familiares por las personas que los acompañan. Algunas casas terminan siendo recuerdos que uno guarda con cariño.",
-
-    "A veces me acuerdo de las conversaciones más absurdas que hemos tenido y me pregunto cómo logramos hablar de tantas cosas sin sentido.",
-
-    "No sé si somos una amistad tranquila. Probablemente no. Pero aburrida, definitivamente, tampoco.",
-
-    "Un pequeño recordatorio: no tienes que tener todo resuelto para estar haciendo las cosas bien.",
-
-    "Me gusta pensar que dentro de unos años recordaremos esta etapa y tendremos muchas historias que contar.",
-
-    "Hay personas con las que uno puede hablar de cualquier cosa. Y después estamos nosotros, que podemos pasar de un tema serio a una estupidez en segundos.",
-
-    "Gracias por las veces que has estado, incluso cuando no había una solución sencilla ni una conversación perfecta.",
-
-    "La universidad nos ha dejado tareas, desvelos y preocupaciones. Pero también nos dejó personas que valen la pena.",
-
-    "Si alguna vez dudas de lo mucho que has avanzado, recuerda todo lo que has tenido que atravesar para llegar hasta aquí.",
-
-    "Hay recuerdos que no necesitan fotografías. Basta con mencionar una frase para que vuelva toda una historia.",
-
-    "No prometo dejar de molestarte. Sería una promesa poco realista. Pero sí espero seguir acompañándote en muchas etapas.",
-
-    "Un día cualquiera puede convertirse en un recuerdo favorito sin que uno se dé cuenta. Ojalá tengamos muchos de esos.",
-
-    "La amistad también consiste en poder desaparecer un rato, volver a hablar y sentir que no pasó nada.",
-
-    "Espero que nunca pierdas esa capacidad de reírte incluso cuando las cosas se ponen complicadas.",
-
-    "Hay personas que llegan a una etapa de la vida y terminan quedándose en muchas más. Me alegra que seas una de ellas.",
-
-    "No todas las historias necesitan grandes acontecimientos. A veces basta con una tarde, una conversación y buena compañía.",
-
-    "Si nuestra amistad fuera una asignatura, seguramente tendría demasiados créditos y un examen final bastante difícil.",
-
-    "Ojalá nunca nos falten motivos para celebrar, lugares a los que ir y conversaciones que se alarguen más de lo previsto.",
-
-    "Te deseo tranquilidad para los días difíciles, entusiasmo para los nuevos proyectos y paciencia para todo lo demás.",
-
-    "Algunas personas conocen nuestras metas. Otras conocen también nuestros miedos. Las amistades importantes suelen conocer ambas cosas.",
-
-    "La Navidad tiene algo bonito: hace que uno mire hacia atrás y recuerde a quienes hicieron más llevadero el año.",
-
-    "No necesitas convertirte en otra persona para merecer cosas buenas. Sigue construyendo tu camino a tu manera.",
-
-    "Me gustaría que dentro de muchos años sigamos teniendo anécdotas que probablemente no podamos contar delante de todo el mundo.",
-
-    "Gracias por ser parte de una etapa que, con todo y sus complicaciones, también ha tenido momentos inolvidables.",
-
-    "No sé qué nos espera después de la universidad, pero espero que la vida nos siga dando oportunidades para coincidir.",
-
-    "Que nunca te falten motivos para sentir orgullo de ti misma, incluso por esas pequeñas cosas que nadie más ve.",
-
-    "Si pudiera resumir esta amistad en una idea, sería esta: hemos tenido nuestras diferencias, pero también muchas razones para seguir aquí.",
-
-    "Este último capítulo no es un final. Es simplemente una forma de agradecer por los anteriores y brindar por los que faltan."
-
-  ],
-
-
-  laura: [
-
-    "Hay personas con las que conversar se siente fácil. No hace falta preparar el tema ni buscar demasiado las palabras. Simplemente sucede.",
-
-    "A veces los mejores planes no son los más elaborados. Basta con salir, caminar un rato y tener buena compañía.",
-
-    "Tengo la sospecha de que algunas películas se disfrutan más cuando uno va con la persona correcta.",
-
-    "No sé si extraño más las películas o la costumbre de ir al cine contigo. Probablemente ambas cosas.",
-
-    "Recordatorio amistoso: todavía tenemos salidas pendientes. No pienso dejar que todas se queden en planes.",
-
-    "Hay amistades que no necesitan grandes explicaciones. Uno simplemente sabe que puede pasar un buen rato con esa persona.",
-
-    "Ojalá nunca falten conversaciones espontáneas, risas inesperadas y planes que terminan siendo mejores de lo esperado.",
-
-    "A veces una buena compañía hace que hasta el plan más sencillo termine siendo memorable.",
-
-    "Hay personas que tienen una forma especial de hacer que los días normales se sientan un poquito mejores.",
-
-    "No sé cuándo volveremos a tener nuestra próxima sesión de cine, pero espero que no tarde demasiado.",
-
-    "Una pequeña misión para el futuro: encontrar una película que ambos queramos ver y hacer que el plan suceda.",
-
-    "La vida universitaria puede ser bastante intensa. Por eso también hacen falta momentos para desconectarse y disfrutar.",
-
-    "Espero que este mes te regale motivos para sonreír, descansar y hacer cosas que realmente disfrutes.",
-
-    "Hay conversaciones que empiezan sin rumbo y terminan siendo las mejores. Esas son de mis favoritas.",
-
-    "El patino de Cine Colombia sigue esperando su momento de gloria. No hemos olvidado ese asunto.",
-
-    "Ojalá sigamos encontrando excusas para salir, comer algo rico y ponernos al día.",
-
-    "No hace falta que cada salida sea un gran evento. A veces el mejor plan es simplemente coincidir.",
-
-    "Espero que nunca te falten personas con las que puedas ser tú misma sin tener que pensar demasiado.",
-
-    "Un día deberíamos hacer una lista de todas las películas que tenemos pendientes. Aunque probablemente terminemos discutiendo por la primera.",
-
-    "Hay amistades que hacen más ligero el camino. Me alegra que esta sea una de ellas.",
-
-    "Si este año tuvo días complicados, espero que también te haya dejado momentos que valga la pena recordar.",
-
-    "Te deseo muchos planes espontáneos, buenas noticias y películas que realmente estén a la altura de las expectativas.",
-
-    "Una amistad también se construye con pequeños detalles: preguntar cómo estás, compartir una risa o acordarse de un plan pendiente.",
-
-    "La Navidad es una buena excusa para agradecer por las personas que hacen más agradable el año.",
-
-    "No dejes que las obligaciones ocupen todo el espacio. También mereces tardes tranquilas y momentos divertidos.",
-
-    "Espero que el próximo año nos encuentre con más tiempo para compartir y menos excusas para aplazar los planes.",
-
-    "Hay recuerdos que se construyen sin darse cuenta. Una salida cualquiera puede terminar siendo uno de ellos.",
-
-    "Que nunca falten los buenos lugares, las buenas películas y las personas con quienes disfrutarlos.",
-
-    "Te dejo una invitación abierta: cuando quieras, recuperamos esa tradición cinematográfica.",
-
-    "Al final, las mejores casualidades son las personas con las que uno tiene ganas de seguir coincidiendo.",
-
-    "Este es el último día del calendario, pero no tiene por qué ser el último plan. Todavía tenemos mucho por compartir."
-
-  ],
-
-
-  luisa: [
-
-    "Hay personas que tienen una forma curiosa de hacer que una conversación normal termine siendo bastante entretenida. Tú pareces tener ese talento.",
-
-    "Admito que algunas conversaciones contigo tienen más capítulos de los que inicialmente esperaba.",
-
-    "No sé si eres especialmente elocuente o si simplemente tienes la habilidad de dejarme pensando en lo que acabas de decir.",
-
-    "Hay coincidencias que uno no planea. Algunas simplemente aparecen y hacen que el día sea más interesante.",
-
-    "No voy a sacar conclusiones apresuradas. Por ahora, me basta con reconocer que conversar contigo es bastante agradable.",
-
-    "Si algún día escribieran una historia sobre nuestras conversaciones, probablemente habría que clasificarla como comedia con elementos inesperados.",
-
-    "Tienes una manera particular de expresarte que hace que incluso los temas más sencillos resulten interesantes.",
-
-    "Una pregunta importante: ¿cuántas conversaciones curiosas hacen falta para que una coincidencia deje de ser casualidad?",
-
-    "No todo tiene que tener una definición inmediata. A veces está bien disfrutar de las cosas mientras ocurren.",
-
-    "Hay personas que llaman la atención por cómo se ven. Otras por cómo piensan. Algunas consiguen ambas cosas.",
-
-    "No prometo tener siempre respuestas brillantes, pero sí puedo ofrecer conversaciones, curiosidad y algún comentario cuestionable.",
-
-    "El futuro es bastante impredecible. Aunque debo admitir que algunas posibilidades resultan entretenidas de imaginar.",
-
-    "Me gusta la gente con la que se puede hablar sin sentir que cada silencio necesita ser llenado.",
-
-    "Hay algo atractivo en las personas que tienen criterio propio y no sienten la necesidad de estar de acuerdo con todo.",
-
-    "Si nuestra historia fuera una película, todavía estaríamos en la parte donde los personajes se conocen y el guionista no ha decidido qué hacer.",
-
-    "No todas las preguntas necesitan respuestas serias. Algunas existen solamente para provocar una buena conversación.",
-
-    "Una pequeña observación: tienes una capacidad bastante interesante para hacer que uno quiera seguir escuchando.",
-
-    "No voy a inventar un destino ni a escribir promesas. Prefiero dejar espacio para las sorpresas reales.",
-
-    "A veces la mejor parte de conocer a alguien es descubrir poco a poco los detalles que no aparecen a primera vista.",
-
-    "El futuro hipotético sigue siendo hipotético. Pero debo reconocer que tiene un departamento creativo bastante activo.",
-
-    "Ojalá nunca pierdas esa forma de expresarte, cuestionar las cosas y encontrar humor donde otros no lo ven.",
-
-    "Hay conversaciones que se recuerdan por lo que se dijo. Otras, simplemente, por la sensación agradable que dejaron.",
-
-    "No todo lo interesante tiene que suceder de inmediato. Algunas cosas merecen tiempo y tranquilidad.",
-
-    "Si algún día llegamos a tener una discusión sobre quién tenía razón, espero que al menos sea una discusión entretenida.",
-
-    "Me parece una buena idea seguir acumulando conversaciones, risas y momentos sin necesidad de ponerles un nombre demasiado pronto.",
-
-    "La curiosidad es una de las mejores razones para conocer a alguien. Y algunas personas consiguen mantenerla despierta.",
-
-    "No sé qué capítulos tendrá el próximo año. Pero espero que incluya buenas conversaciones y algunas sorpresas agradables.",
-
-    "A veces lo más bonito de una posibilidad es que todavía no sabemos qué forma va a tomar.",
-
-    "Te deseo un año lleno de proyectos, buenas decisiones y personas que sepan apreciar tu manera de ver el mundo.",
-
-    "Si alguna vez hacemos una lista de nuestras conversaciones más absurdas, sospecho que será bastante extensa.",
-
-    "Y llegamos al último día. No hay promesas grandilocuentes ni finales de película. Solo un deseo: que sigan existiendo motivos para coincidir."
-
-  ]
-
-};
-
-
-/* =========================================================
-   08. TÍTULOS DE LOS REGALOS
-========================================================= */
-
-const titulos = {
-
-  milena: [
-    "El comienzo de nuestra historia",
-    "Las pequeñas grandes cosas",
-    "Una amistad poco convencional",
-    "Un lugar entre los recuerdos",
-    "Risas que no se olvidan",
-    "Una amistad con carácter",
-    "Un recordatorio necesario",
-    "Lo que todavía nos espera",
-    "Conversaciones sin sentido",
-    "Estar cuando importa",
-    "Lo bueno de coincidir",
-    "Todo lo que has superado",
-    "Recuerdos sin fotografía",
-    "Una promesa realista",
-    "Un día cualquiera",
-    "La confianza de siempre",
-    "No pierdas esa sonrisa",
-    "Personas que se quedan",
-    "Los planes sencillos",
-    "Nuestra asignatura pendiente",
-    "Más historias por contar",
-    "Un deseo para ti",
-    "Un pequeño archivo de recuerdos",
-    "Tiempo de agradecer",
-    "Una versión que sigue creciendo",
-    "El futuro también cuenta",
-    "Lo que nos ha dejado esta etapa",
-    "Después de la universidad",
-    "Un deseo sincero",
-    "Una amistad que continúa",
-    "Hasta el siguiente capítulo"
-  ],
-
-  laura: [
-    "Una bonita casualidad",
-    "La magia de conversar",
-    "Una buena película",
-    "Tradiciones pendientes",
-    "Una salida pendiente",
-    "La comodidad de coincidir",
-    "Planes espontáneos",
-    "Una buena compañía",
-    "Los días más bonitos",
-    "Nuestra próxima película",
-    "Una pequeña misión",
-    "Un descanso necesario",
-    "Un deseo especial",
-    "Conversaciones favoritas",
-    "El patino nos espera",
-    "Un plan sin complicaciones",
-    "La próxima salida",
-    "Ser uno mismo",
-    "Nuestra lista de películas",
-    "Una amistad agradable",
-    "Un año para recordar",
-    "Buenas noticias",
-    "Pequeños detalles",
-    "Un diciembre bonito",
-    "Un momento para ti",
-    "Más tiempo juntos",
-    "Una historia cotidiana",
-    "Buenos momentos",
-    "Una invitación abierta",
-    "Las mejores casualidades",
-    "La siguiente salida"
-  ],
-
-  luisa: [
-    "Una coincidencia curiosa",
-    "Conversaciones con capítulos",
-    "Una forma particular de pensar",
-    "Casualidades interesantes",
-    "Sin conclusiones apresuradas",
-    "Una historia peculiar",
-    "El arte de conversar",
-    "Una pregunta curiosa",
-    "Sin etiquetas innecesarias",
-    "Una combinación interesante",
-    "Una oferta conversacional",
-    "El futuro hipotético",
-    "Una buena conversación",
-    "Criterio propio",
-    "El primer acto",
-    "Una pregunta sin respuesta",
-    "Un detalle interesante",
-    "Sin promesas",
-    "Pequeños descubrimientos",
-    "Una posibilidad divertida",
-    "Una buena cualidad",
-    "Conversaciones memorables",
-    "Sin prisa",
-    "Un guion inesperado",
-    "La curiosidad",
-    "Nuevos capítulos",
-    "Una posibilidad abierta",
-    "Lo que todavía no sabemos",
-    "Un deseo para ti",
-    "Una historia por escribir",
-    "Continuará..."
-  ]
-
-};
-
-
-/* =========================================================
-   09. GENERADOR DE LOS 93 REGALOS
-========================================================= */
-
-function crearRegalos(personaId) {
-
-  const listaMensajes = mensajes[personaId];
-  const listaTitulos = titulos[personaId];
-
-  return Object.fromEntries(
-
-    Array.from({ length: 31 }, (_, indice) => {
-
-      const dia = indice + 1;
-
-      const elementos = [];
-
-      const mensaje = listaMensajes[indice];
-
-      // Días especiales
-      if (dia === 24) {
-
-        elementos.push({
-          tipo: "carta",
-          contenido:
-            mensaje +
-            "\n\nQue esta Navidad te encuentre rodeada de tranquilidad, cariño y motivos para sonreír."
-        });
-
-        elementos.push({
-          tipo: "video",
-          contenido: personaId === "milena"
-            ? "https://www.youtube.com/watch?v=MKHtXovAejs"
-            : personaId === "laura"
-              ? "https://www.youtube.com/watch?v=3WsufJe4YN8"
-              : "https://www.youtube.com/watch?v=420h4EyO01w"
-        });
-
-      }
-
-      else if (dia === 31) {
-
-        elementos.push({
-          tipo: "carta",
-          contenido:
-            mensaje +
-            "\n\nGracias por formar parte de este pequeño proyecto. Ojalá el año que viene nos regale nuevas historias."
-        });
-
-        elementos.push({
-          tipo: "cupon",
-          contenido: "Un plan pendiente",
-          descripcion:
-            personaId === "milena"
-              ? "Una experiencia para compartir, reírnos y seguir acumulando recuerdos."
-              : personaId === "laura"
-                ? "Una salida, una buena película y una tarde para ponernos al día."
-                : "Una conversación, un plan interesante y una nueva anécdota.",
-          nota: "Canjeable sin fecha de vencimiento."
-        });
-
-      }
-
-      // Cartas en días seleccionados
-      else if ([1, 7, 14, 21, 28].includes(dia)) {
-
-        elementos.push({
-          tipo: "carta",
-          contenido: mensaje
-        });
-
-        elementos.push({
-          tipo: "texto",
-          contenido:
-            "No todos los regalos tienen que ser materiales. A veces unas palabras llegan en el momento indicado."
-        });
-
-      }
-
-      // Cupones
-      else if ([5, 10, 15, 20, 25, 30].includes(dia)) {
-
-        elementos.push({
-          tipo: "texto",
-          contenido: mensaje
-        });
-
-        elementos.push({
-          tipo: "cupon",
-          contenido: obtenerCupon(personaId, dia),
-          descripcion: obtenerDescripcionCupon(personaId, dia),
-          nota: "Una invitación abierta para cuando ambos quieran."
-        });
-
-      }
-
-      // Canciones
-      else if ([3, 9, 18, 27].includes(dia)) {
-
-        elementos.push({
-          tipo: "texto",
-          contenido: mensaje
-        });
-
-        elementos.push({
-          tipo: "cancion",
-          contenido: obtenerEnlaceCancion(personaId)
-        });
-
-      }
-
-      // Días con reflexión y cita
-      else if ([4, 12, 16, 22, 29].includes(dia)) {
-
-        elementos.push({
-          tipo: "texto",
-          contenido: mensaje
-        });
-
-        elementos.push({
-          tipo: "cita",
-          contenido: obtenerCita(personaId, dia)
-        });
-
-      }
-
-      // Regalos normales
-      else {
-
-        elementos.push({
-          tipo: "texto",
-          contenido: mensaje
-        });
-
-        if (dia % 2 === 0) {
-          elementos.push({
-            tipo: "texto",
-            contenido: obtenerDetalleAdicional(personaId, dia)
-          });
-        }
-
-      }
-
-      return [
-        dia,
-        {
-          titulo: dia === 24
-            ? "Una Navidad especial"
-            : dia === 31
-              ? "El último capítulo del año"
-              : listaTitulos[indice],
-
-          elementos
-        }
-      ];
-
-    })
-
-  );
-
-}
-
-
-function obtenerCupon(personaId, dia) {
-
-  const cupones = {
-
+  const destinataria = calendarios[destinatariaSolicitada]
+    ? destinatariaSolicitada
+    : "milena";
+  const persona = calendarios[destinataria];
+
+  /* -------------------------------------------------------
+     2. CONTENIDO DE LOS REGALOS
+     Formato: [título, contenido, tipo]
+     Tipos: carta, texto, reto, cupon, foto, galeria,
+            cancion, lista, especial
+  ------------------------------------------------------- */
+
+  const contenido = {
     milena: [
-      "Una tarde de recuerdos",
-      "Un café y una conversación",
-      "Una salida sin mirar el reloj",
-      "Una tarde de películas",
-      "Una comida pendiente",
-      "Una aventura improvisada"
+      ["Donde empezó todo", "Quién diría que de todas las personas que conoceríamos en primer semestre, terminaríamos construyendo una amistad como esta. Este es el primer capítulo de un pequeño álbum dedicado a nosotros.", "carta"],
+      ["Una canción para acompañarte", "Hay canciones que no necesitan explicar demasiado. Simplemente acompañan ciertos momentos y terminan convirtiéndose en parte de nuestros recuerdos.", "cancion"],
+      ["Un instante para guardar", "Aquí va una fotografía de nosotros. Elige una que te haga sonreír cada vez que la vuelvas a ver.", "foto"],
+      ["Si pudieras repetir un día...", "¿Qué momento de todos los que hemos compartido volverías a vivir exactamente igual? Guárdate la respuesta; algún día quiero conocerla.", "reto"],
+      ["Vale por una salida", "Una salida juntos, a elección de la beneficiaria. Incluye conversación, risas y tiempo de calidad. Sin fecha de vencimiento; solo hay que ponernos de acuerdo.", "cupon"],
+      ["Nuestra pequeña galería", "Tres fotografías, tres momentos y un montón de historias. Aquí añadiremos imágenes reales de nuestras aventuras.", "galeria"],
+      ["Banda sonora de diciembre", "Una pequeña selección para distintos estados de ánimo: una canción para reír, otra para recordar, otra para descansar y una para cantar sin importar quién escuche.", "texto"],
+      ["Cosas que admiro de ti", "Valoro mucho la persona que eres. Admiro la confianza que hemos construido, la manera en que podemos compartir tanto los momentos buenos como los complicados y esa posibilidad de hablar sin fingir que todo está bien. Me alegra haberte encontrado en este camino.", "carta"],
+      ["Una misión espontánea", "Tómate una fotografía de algo que haya hecho bonito tu día. Puede ser una persona, un lugar, una comida o simplemente un momento. La idea es compartir un pedacito de nuestro diciembre.", "reto"],
+      ["Nosotros dentro de cinco años", "Imagina que estamos en diciembre de 2031. ¿Dónde crees que estaremos? ¿Ya habremos sobrevivido a Medicina? ¿Qué cosas habrán cambiado y qué crees que seguirá siendo igual entre nosotros?", "reto"],
+      ["Certificado oficial", "Por su destacada capacidad para escuchar historias, compartir locuras, sobrevivir a conversaciones inesperadas y formar parte de capítulos importantes. Se otorga el título de: AMIGA DE CONFIANZA Y CÓMPLICE OFICIAL.", "texto"],
+      ["Medicina nos presentó", "Empezamos compartiendo clases, trabajos y preocupaciones universitarias. No sabíamos que también estábamos empezando una amistad que iba mucho más allá. Aquí va una foto o recuerdo de aquellos primeros semestres.", "foto"],
+      ["Vale por una tarde de películas", "Una tarde para elegir película, preparar algo rico y olvidarnos un rato de las responsabilidades. La película puede ser buena o terrible; la compañía ya está asegurada.", "cupon"],
+      ["Cinco cosas que hacen especial nuestra amistad", "1. La confianza que construimos.\n2. Poder hablar de cualquier cosa.\n3. Reírnos incluso en días pesados.\n4. Saber que podemos contar el uno con el otro.\n5. Que, con todo y nuestras diferencias, seguimos aquí.", "lista"],
+      ["¿Qué tanto nos conocemos?", "Reto: cada uno escribirá tres recuerdos favoritos de nuestra amistad. Después comparamos las respuestas. Se permite discutir por detalles, pero no cambiar la historia para ganar.", "reto"],
+      ["Un recuerdo sin explicación", "Hay fotografías que no necesitan una descripción larga. Basta con verlas para recordar cómo nos sentíamos en ese momento. Aquí guardaremos una de esas.", "foto"],
+      ["Compañera de aventuras", "Se reconoce oficialmente tu participación en múltiples conversaciones, planes improvisados, momentos memorables y episodios de supervivencia universitaria. El cargo es permanente y no admite renuncia.", "texto"],
+      ["Una canción y una dedicatoria", "Esta canción es una pausa dentro del calendario. Escúchala con calma y quédate con lo que te haga sentir; a veces la música dice cosas que uno no sabe cómo explicar.", "cancion"],
+      ["Un plan pendiente", "Elige una actividad que te gustaría que hiciéramos antes de que termine el año. No tiene que ser algo costoso ni complicado: lo importante es compartir el momento.", "reto"],
+      ["Gracias por estar", "No siempre hace falta tener las palabras correctas. A veces basta con saber que hay alguien dispuesto a escuchar. Gracias por esos momentos y por la confianza que hemos construido.", "carta"],
+      ["Un álbum de pequeños momentos", "Aquí añadiremos un collage con esos momentos cotidianos que terminan siendo importantes: una salida, una visita, una risa o cualquier recuerdo que merezca quedarse.", "galeria"],
+      ["Cuéntame esa historia", "Elige una anécdota nuestra que siempre te haga reír y cuéntamela otra vez. Prometo escucharla como si no la hubiera oído, aunque probablemente recuerde hasta los detalles.", "reto"],
+      ["Vale por una noche de parche", "Canjeable por comida rica, una conversación larga y cero presión por tener un plan extraordinario. La fecha la elegimos entre los dos.", "cupon"],
+      ["Una Navidad para recordar", "Milena, gracias por tantos capítulos compartidos: por las risas, las visitas, la confianza y también por esos momentos en los que no pensamos igual. Te deseo una Navidad llena de cariño, tranquilidad y motivos para sonreír. Me alegra muchísimo tenerte en mi vida.", "especial"],
+      ["Un mensaje escondido", "Pista: piensa en uno de nuestros momentos más espontáneos. La sorpresa de hoy es que todavía nos quedan muchísimas cosas por hacer y recuerdos por fabricar. Este álbum no se termina aquí.", "reto"],
+      ["Música para distintos días", "Guarda esta idea: una canción para los días felices, una para cuando necesites desconectarte y otra para esos días en los que solo quieres recordar lo bonito que también tiene la vida.", "cancion"],
+      ["Diez cosas que todavía debemos hacer", "1. Hacer una salida sin afanes.\n2. Ver una película.\n3. Probar un lugar nuevo.\n4. Tomarnos más fotografías.\n5. Tener una conversación larguísima.\n6. Hacer un plan improvisado.\n7. Reírnos hasta cansarnos.\n8. Celebrar un logro.\n9. Crear una anécdota absurda.\n10. Seguir sumando capítulos.", "lista"],
+      ["Una memoria especial", "Este espacio queda reservado para una fotografía y su historia. No tiene que ser el día más espectacular: basta con que sea un recuerdo que quieras conservar.", "foto"],
+      ["¿Qué recuerdas de nosotros?", "Tres preguntas: ¿cuál fue nuestra primera conversación que recuerdas?, ¿qué momento te hizo pensar que ya había confianza?, ¿qué plan repetirías? Puedes responderlas cuando quieras.", "reto"],
+      ["Lo que espero que nunca cambie", "Ojalá nunca perdamos la confianza para hablar, la libertad de molestarnos, la capacidad de reírnos de nosotros mismos y las ganas de estar presentes incluso cuando la vida se complique. Gracias por estos capítulos.", "carta"],
+      ["El último capítulo... por ahora", "Treinta y un días no alcanzan para resumir una amistad. Gracias por las risas, las conversaciones, las visitas, la confianza y hasta por las discusiones. Todo eso también forma parte de nosotros. Por todos los capítulos que ya vivimos y por los que todavía nos faltan. Feliz Año Nuevo, Milena.", "especial"]
     ],
 
     laura: [
-      "Una tarde de cine",
-      "Una salida para ponernos al día",
-      "Una película y algo rico",
-      "Una tarde de conversación",
-      "Una nueva aventura cinematográfica",
-      "Una salida sin excusas"
+      ["Una bonita casualidad", "Qué curioso que algunas personas terminen formando parte de nuestra vida sin que uno lo haya planeado. Me alegra que tú seas una de ellas, Laurel. Bienvenida a este pequeño diciembre de sorpresas.", "carta"],
+      ["Una canción para tu día", "Una melodía para acompañar este día. A veces una canción basta para cambiar el ambiente y hacer que una tarde normal se sienta un poquito más bonita.", "cancion"],
+      ["Un recuerdo para guardar", "Aquí va una fotografía nuestra. Elige una que represente bien esos momentos sencillos que terminan siendo buenos recuerdos.", "foto"],
+      ["Tu plan ideal", "Si mañana tuvieras una tarde libre, sin clases, trabajos ni pendientes, ¿qué plan escogerías? Puedes responder con el plan más tranquilo o con el más improvisado.", "reto"],
+      ["Vale por un parche", "Una salida a elección de Laurel. Puede ser comer algo, caminar, hablar o simplemente salir de la rutina. Lo importante es encontrar el momento.", "cupon"],
+      ["Pequeñas casualidades", "Una mini galería con tres momentos compartidos. No tienen que ser grandes eventos: a veces una foto espontánea dice más que mil planes.", "galeria"],
+      ["Una playlist para desconectar", "Canciones para caminar, descansar, arreglarse, estudiar o simplemente dejar que pase la tarde. La música también puede ser una buena compañera.", "texto"],
+      ["Algo que valoro de ti", "Me gusta tu forma de conversar, esa facilidad para compartir sin complicaciones y la comodidad que se siente cuando coincidimos. Gracias por ser una compañía tan agradable.", "carta"],
+      ["La foto del día", "Reto: toma una fotografía de algo que te haya alegrado el día. Puede ser cualquier cosa. La idea es compartir una pequeña casualidad bonita.", "reto"],
+      ["Nuestra próxima película", "Elige una película que te gustaría ver. La misión es encontrar una fecha para volver a cumplir ese plan de cine que llevamos tiempo diciendo que deberíamos recuperar.", "reto"],
+      ["Laurel, una pregunta importante", "¿Cuántos planes hemos dicho que deberíamos hacer y todavía no hemos concretado? No respondas demasiado rápido; podría ser preocupante.", "texto"],
+      ["Un recuerdo de Medicina", "Aunque la universidad tenga su buena dosis de estrés, también nos ha permitido coincidir con personas y momentos agradables. Aquí va un espacio para una foto o recuerdo de esa etapa.", "foto"],
+      ["Vale por cine", "Cupón válido por una ida al cine. La película se elige entre los dos y el patino de Cine Colombia queda bajo consideración especial. No prometo que no lo mencione.", "cupon"],
+      ["Tres cosas que hacen bonito un parche", "1. Buena conversación.\n2. No tener que fingir ni forzar nada.\n3. Reírse incluso de las cosas más simples.\nCon eso ya tenemos una buena fórmula.", "lista"],
+      ["¿Qué tanto coincidimos?", "Cada uno debe escoger una película, una comida y un lugar para salir. Después comparamos respuestas. Si coincidimos en todo, habrá que investigar esa casualidad.", "reto"],
+      ["Una fotografía espontánea", "Aquí guardaremos una imagen de un momento compartido. La regla es sencilla: que sea real, que nos guste y que nos recuerde algo bonito.", "foto"],
+      ["Reconocimiento a la buena compañía", "Se reconoce a Laurel por su destacada capacidad para hacer que una conversación fluya, un plan sencillo se disfrute y una tarde cualquiera tenga algo especial.", "texto"],
+      ["Una canción para recordar", "No todas las canciones tienen que tener una historia detrás. Algunas simplemente se quedan porque acompañaron un momento bonito. Esta es una invitación a encontrar una de esas.", "cancion"],
+      ["El siguiente parche", "Propón un plan que podamos hacer antes de que termine el año. Se aceptan planes sencillos, planes espontáneos y planes que incluyan comida.", "reto"],
+      ["Gracias por coincidir", "Me alegra que hayamos coincidido y que podamos compartir conversaciones, salidas y momentos sin demasiadas formalidades. Tu amistad es de esas pequeñas cosas que hacen más agradable el camino.", "carta"],
+      ["Un diario de momentos", "Tres espacios para fotografías, frases o recuerdos de nuestras salidas. Este diario puede seguir creciendo con el tiempo.", "galeria"],
+      ["La película que nos representa", "Si nuestra amistad fuera una película, ¿qué género sería: comedia, drama, aventura o una mezcla difícil de explicar? Elige el género y defiende tu respuesta.", "reto"],
+      ["Vale por una tarde sin afanes", "Una tarde para comer algo rico, hablar de todo y de nada y dejar que el tiempo pase. Sin agenda universitaria y sin necesidad de correr.", "cupon"],
+      ["Una Navidad bonita", "Laurel, espero que esta Navidad esté llena de tranquilidad, cariño y momentos que te hagan sonreír. Gracias por tu compañía, por las conversaciones y por hacer más bonito este camino. Te deseo cosas muy buenas.", "especial"],
+      ["Una pequeña lista de pendientes", "Pendientes oficiales: recuperar la costumbre del cine, probar un lugar nuevo, hacer una salida sin afanes y seguir acumulando historias que después podamos recordar.", "lista"],
+      ["Música para el camino", "Una selección imaginaria para acompañar el trayecto: algo alegre, algo tranquilo y algo que te den ganas de cantar. Que nunca falte una buena banda sonora.", "cancion"],
+      ["Un plan que sí vamos a cumplir", "Escoge una actividad que llevemos tiempo aplazando. Esta vez intentaremos ponerle fecha en lugar de dejarla viviendo eternamente en el «algún día».", "reto"],
+      ["Un recuerdo que merece foto", "Aquí va una fotografía de un momento que quieras conservar. Puede ser una salida, una celebración o una escena cotidiana que te guste recordar.", "foto"],
+      ["Tres preguntas rápidas", "¿Qué salida repetirías? ¿Qué película recomendarías sin dudar? ¿Qué plan nuevo te gustaría hacer? Quedan oficialmente abiertas las recomendaciones.", "reto"],
+      ["Gracias por estos momentos", "Gracias por tu compañía, por las conversaciones y por esos momentos en los que simplemente compartimos sin necesitar una razón especial. Me alegra haberte conocido y espero que nos queden muchos planes, películas y buenos momentos.", "carta"],
+      ["Una casualidad que vale la pena", "La vida está llena de coincidencias, pero algunas terminan convirtiéndose en personas que vale la pena conservar. Gracias por ser una de ellas, Laurel. Que este nuevo año nos regale más planes, películas y buenas conversaciones. Feliz Año Nuevo.", "especial"]
     ],
 
     luisa: [
-      "Una conversación sin límite de tiempo",
-      "Una salida interesante",
-      "Un café y buenas preguntas",
-      "Una tarde de risas",
-      "Un plan inesperado",
-      "Una nueva anécdota"
+      ["Una sospecha inicial", "Tengo una teoría: algunas personas aparecen en nuestra vida y, sin proponérselo, consiguen despertar una curiosidad bastante particular. Cata, tú eres parte de esa teoría. Bienvenida a estos 31 días.", "carta"],
+      ["Una canción para el expediente", "Toda buena historia necesita banda sonora. Esta es una pausa musical para acompañar el día y, de paso, añadir una pista más a este expediente de coincidencias.", "cancion"],
+      ["Una escena para recordar", "Aquí va una fotografía o imagen de un momento compartido. Las buenas historias también se construyen con escenas pequeñas.", "foto"],
+      ["La hipótesis del día", "Si dos personas se entienden bien, se divierten juntas y disfrutan conversar, ¿eso es una simple coincidencia o hay algo interesante que investigar? No hace falta emitir un dictamen.", "reto"],
+      ["Vale por una conversación", "Cupón canjeable por una conversación, un café o un plan tranquilo. Sin presión, sin letra pequeña y sin necesidad de definir absolutamente nada.", "cupon"],
+      ["Pequeñas escenas", "Una galería de momentos, lugares o detalles que tengan una estética especial. Como en toda buena película, no todas las escenas necesitan diálogo.", "galeria"],
+      ["Banda sonora de posibilidades", "Una selección para diferentes escenas: caminar sin rumbo, una conversación larga, una noche tranquila y un momento inesperadamente divertido.", "texto"],
+      ["Una cualidad que admiro", "Admiro tu manera de expresarte, de desarrollar tus ideas y de hacer que una conversación sencilla termine siendo interesante. Me parece especialmente atractiva esa combinación de criterio, personalidad y elocuencia.", "carta"],
+      ["Una misión: prestar atención", "Hoy el reto es encontrar algo pequeño que te haya llamado la atención: una frase, una canción, un lugar o una situación curiosa. Las mejores historias empiezan observando detalles.", "reto"],
+      ["Una escena hipotética", "Imagina que dentro de cinco años nos encontramos por casualidad y empezamos a recordar este diciembre. ¿Qué crees que nos daría más risa de esta etapa?", "reto"],
+      ["Diagnóstico preliminar", "Hallazgos: buena conversación, humor compatible y curiosidad persistente. Conclusión: el caso merece seguimiento. Pronóstico: reservado, pero entretenido.", "texto"],
+      ["Una conversación memorable", "Hay conversaciones que se olvidan y otras que dejan pensando. Aquí puedes guardar una frase o un tema que te haya gustado de alguna de nuestras charlas.", "foto"],
+      ["Vale por un plan", "Un plan elegido entre los dos: café, comida, paseo o cualquier actividad que nos permita conversar y pasar un buen rato. Sin expectativas adicionales.", "cupon"],
+      ["Tres cosas interesantes", "1. Tu manera de expresarte.\n2. Tu sentido del humor.\n3. La facilidad con la que una conversación contigo puede tomar un rumbo inesperado.\nNo es una lista exhaustiva; solo algunos hallazgos.", "lista"],
+      ["Compatibilidad de teorías", "Escoge una película, una comida y un destino para una salida ideal. Después comparamos respuestas. Si coincidimos, será un dato curioso; si no, tendremos temas para debatir.", "reto"],
+      ["Una escena bonita", "Aquí guardaremos una fotografía o un pequeño recuerdo visual. No hace falta que sea perfecto; las escenas espontáneas suelen ser las mejores.", "foto"],
+      ["Reconocimiento a la elocuencia", "Se reconoce a Cata por su capacidad de sostener conversaciones interesantes, defender sus ideas y convertir un intercambio cualquiera en algo que vale la pena escuchar.", "texto"],
+      ["Una canción sin conclusiones", "Escúchala sin buscarle demasiadas interpretaciones. No todo tiene que ser una indirecta; a veces una canción simplemente merece sonar.", "cancion"],
+      ["Una invitación sencilla", "Si te apetece, queda pendiente un plan para compartir algo fuera de la rutina. La idea es disfrutar el momento, no convertirlo en una negociación diplomática.", "reto"],
+      ["Una confesión objetiva", "Sí, me pareces una mujer muy atractiva. Y no voy a fingir que esa fue una observación difícil de realizar. También me gusta lo que he podido conocer de tu manera de pensar.", "carta"],
+      ["Un pequeño archivo de coincidencias", "Aquí puedes guardar tres detalles que te hayan hecho sonreír de este mes. Las coincidencias pequeñas también merecen un lugar en el archivo.", "galeria"],
+      ["Pregunta sin respuesta correcta", "¿Qué valoras más en una conversación: el humor, la profundidad, la espontaneidad o la capacidad de debatir? Se aceptan combinaciones y argumentos extensos.", "reto"],
+      ["Vale por una pausa", "Cupón por un café, una charla o un rato agradable. Canjeable cuando coincidan las ganas y el tiempo. No caduca ni exige explicaciones.", "cupon"],
+      ["Una Navidad especial", "Cata, espero que esta Navidad te regale tranquilidad, alegría y momentos que te hagan sentir querida. Me alegra haber coincidido contigo y poder compartir esta pequeña complicidad. Que disfrutes mucho estas fechas.", "especial"],
+      ["El futuro hipotético", "En algún universo alternativo probablemente tenemos una historia bastante interesante. En este, por ahora, me parece suficiente disfrutar las coincidencias y dejar que cada cosa encuentre su propio ritmo.", "carta"],
+      ["Música para una escena", "Toda película tiene una escena que se queda en la memoria por su música. Elige una canción que te gustaría que sonara en una escena importante de tu vida.", "reto"],
+      ["Una posibilidad entre muchas", "La vida tiene una cantidad absurda de caminos posibles. No sé cuáles nos tocarán, pero me parece bonito que nuestros caminos se hayan cruzado. Lo demás no necesita resolverse hoy.", "texto"],
+      ["Una fotografía con intención", "Aquí va una imagen de un momento, lugar o detalle que te guste. Que sea una pequeña pausa visual dentro de esta colección de posibilidades.", "foto"],
+      ["El guion todavía está abierto", "Tres preguntas: ¿qué experiencia te gustaría vivir el próximo año?, ¿qué lugar te gustaría conocer?, ¿qué habilidad te gustaría aprender? El siguiente capítulo también se escribe fuera de estas páginas.", "reto"],
+      ["Sin adelantar capítulos", "No todas las historias necesitan tener un destino definido desde el principio. Algunas simplemente merecen disfrutarse mientras se escriben. Me gusta coincidir contigo y descubrir poco a poco quién eres.", "carta"],
+      ["Continuará...", "No sé qué capítulos vendrán después, ni creo que tengamos que decidirlo ahora. Solo quería que supieras que disfruto coincidir contigo, que admiro varias cosas de ti y que me parece bonito tenerte en mi presente. Lo demás, si algún día llega, tendrá su propio momento. Feliz Año Nuevo, Cata.", "especial"]
     ]
-
   };
 
-  return cupones[personaId][Math.floor(dia / 5) - 1] ||
-    cupones[personaId][0];
-}
+  // El día 25 (Navidad) es el gran regalo navideño. El día 24
+  // conserva una sorpresa normal para que el efecto de medianoche
+  // llegue al comenzar el 25 de diciembre.
+  Object.keys(contenido).forEach(clave => {
+    [contenido[clave][23], contenido[clave][24]] =
+      [contenido[clave][24], contenido[clave][23]];
+  });
 
+  /* -------------------------------------------------------
+     3. PREPARAR PERSONA Y PORTADA
+  ------------------------------------------------------- */
 
-function obtenerDescripcionCupon(personaId, dia) {
+  document.body.classList.add(persona.tema);
+  document.title = `${persona.titulo} | Diciembre 2026`;
 
-  if (personaId === "milena") {
-    return "Un espacio para compartir, recordar historias y crear algunas nuevas.";
+  const edition = document.getElementById("edition");
+  const mainTitle = document.getElementById("main-title");
+  const subtitle = document.getElementById("subtitle");
+  const welcome = document.getElementById("welcome");
+
+  if (edition) edition.textContent = persona.edicion;
+  if (mainTitle) mainTitle.textContent = persona.titulo;
+  if (subtitle) subtitle.textContent = persona.subtitulo;
+
+  if (welcome && !welcome.querySelector(".cover-art")) {
+    const portada = document.createElement("div");
+    portada.className = "cover-art";
+
+    const simbolo = document.createElement("span");
+    simbolo.className = "cover-symbol";
+    simbolo.textContent = persona.simbolo;
+
+    const detalle = document.createElement("span");
+    detalle.className = "cover-detail";
+    detalle.textContent = persona.detalle;
+
+    portada.append(simbolo, detalle);
+    welcome.insertBefore(portada, welcome.firstChild);
   }
 
-  if (personaId === "laura") {
-    return "Una invitación a recuperar nuestros planes y disfrutar de una buena compañía.";
+  /* -------------------------------------------------------
+     4. ACCESO DE DEMOSTRACIÓN
+  ------------------------------------------------------- */
+
+  const password = document.getElementById("password");
+  const enterButton = document.getElementById("enter-button");
+  const welcomeScreen = document.getElementById("welcome");
+  const calendarScreen = document.getElementById("calendar-screen");
+
+  if (password) {
+    password.disabled = true;
+    password.placeholder = "Acceso privado en preparación";
   }
 
-  return "Una oportunidad para seguir conversando y descubrir qué otras coincidencias aparecen.";
-}
-
-
-function obtenerEnlaceCancion(personaId) {
-
-  // Reutilizamos el soundtrack elegido para cada calendario.
-  // Puedes reemplazarlo por un enlace Spotify Embed más adelante.
-
-  return `https://www.youtube.com/watch?v=${calendarios[personaId].soundtrack}`;
-}
-
-
-function obtenerCita(personaId, dia) {
-
-  const citas = {
-
-    milena: [
-      "Las buenas amistades también sobreviven a los días complicados.",
-      "Los recuerdos más valiosos suelen ser los más sencillos.",
-      "Crecer también significa aprender a agradecer a quienes estuvieron.",
-      "Una amistad verdadera no necesita ser perfecta.",
-      "Hay personas que hacen que una etapa valga la pena."
-    ],
-
-    laura: [
-      "Los mejores planes empiezan con una buena compañía.",
-      "Una conversación agradable puede cambiar un día entero.",
-      "Las pequeñas casualidades también construyen historias.",
-      "No hay mejor plan que disfrutar el momento.",
-      "Algunos recuerdos comienzan con un simple: ¿vamos?"
-    ],
-
-    luisa: [
-      "La curiosidad es una excelente forma de comenzar.",
-      "No todas las posibilidades necesitan una respuesta inmediata.",
-      "Las mejores conversaciones dejan preguntas interesantes.",
-      "Una buena conexión también se construye con tranquilidad.",
-      "A veces lo inesperado es lo más interesante."
-    ]
-
-  };
-
-  return citas[personaId][Math.floor(dia / 6) % 5];
-}
-
-
-function obtenerDetalleAdicional(personaId, dia) {
-
-  const detalles = {
-
-    milena:
-      "Y por si hoy necesitabas escucharlo: espero que estés orgullosa de todo lo que has conseguido, incluso de lo que todavía estás construyendo.",
-
-    laura:
-      "Ojalá hoy encuentres un motivo sencillo para sonreír. A veces eso basta para hacer que el día sea mejor.",
-
-    luisa:
-      "No pierdas esa curiosidad que te lleva a cuestionar, aprender y mirar las cosas desde perspectivas diferentes."
-
-  };
-
-  return detalles[personaId];
-}
-
-
-const regalos = {
-  milena: crearRegalos("milena"),
-  laura: crearRegalos("laura"),
-  luisa: crearRegalos("luisa")
-};
-
-
-/* =========================================================
-   10. ELEMENTOS DINÁMICOS DE LOS REGALOS
-========================================================= */
-
-function crearElemento(tag, clase, contenido) {
-
-  const elemento = document.createElement(tag);
-
-  if (clase) {
-    elemento.className = clase;
+  const loginLabel = document.querySelector(".login label");
+  if (loginLabel) {
+    loginLabel.textContent = "Tu sorpresa está lista";
   }
 
-  if (contenido !== undefined) {
-    elemento.textContent = contenido;
+  const loginMessage = document.getElementById("login-message");
+  if (loginMessage) {
+    loginMessage.textContent = "Esta es una vista previa; el acceso privado se configurará antes de compartir.";
   }
 
-  return elemento;
-}
+  if (enterButton) {
+    enterButton.textContent = "Abrir mi calendario";
+    enterButton.addEventListener("click", () => {
+      if (welcomeScreen) welcomeScreen.hidden = true;
+      if (calendarScreen) calendarScreen.hidden = false;
 
+      const calendarTitle = document.getElementById("calendar-title");
+      const calendarSubtitle = document.getElementById("calendar-subtitle");
 
-function crearReproductor(enlace, tipo) {
-
-  try {
-
-    const url = new URL(enlace);
-
-    if (url.protocol !== "https:") {
-      throw new Error("Solo se permiten enlaces HTTPS.");
-    }
-
-    let direccion = "";
-
-    const esYouTube =
-      url.hostname === "youtube.com" ||
-      url.hostname === "www.youtube.com" ||
-      url.hostname === "m.youtube.com" ||
-      url.hostname === "youtu.be";
-
-    if (esYouTube) {
-
-      let videoId = "";
-
-      if (url.hostname === "youtu.be") {
-        videoId = url.pathname.split("/")[1] || "";
+      if (calendarTitle) {
+        calendarTitle.textContent = `Diciembre de ${persona.apodo}`;
+      }
+      if (calendarSubtitle) {
+        calendarSubtitle.textContent = `${persona.detalle} · 31 días especiales`;
       }
 
-      else if (url.pathname === "/watch") {
-        videoId = url.searchParams.get("v") || "";
-      }
-
-      else if (
-        url.pathname.startsWith("/embed/") ||
-        url.pathname.startsWith("/shorts/")
-      ) {
-        videoId = url.pathname.split("/")[2] || "";
-      }
-
-      if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-        throw new Error("El identificador de YouTube no es válido.");
-      }
-
-      direccion =
-        `https://www.youtube-nocookie.com/embed/${videoId}?rel=0`;
-
-    }
-
-    else if (
-      tipo === "cancion" &&
-      url.hostname === "open.spotify.com" &&
-      url.pathname.startsWith("/embed/")
-    ) {
-
-      direccion = url.href;
-
-    }
-
-    else {
-      throw new Error("Proveedor de contenido no compatible.");
-    }
-
-    const reproductor = document.createElement("iframe");
-
-    reproductor.src = direccion;
-
-    reproductor.title =
-      tipo === "video"
-        ? "Video de la sorpresa"
-        : "Canción de la sorpresa";
-
-    reproductor.className =
-      tipo === "video"
-        ? "gift-media video"
-        : "gift-media";
-
-    reproductor.allow =
-      "autoplay; encrypted-media; picture-in-picture";
-
-    reproductor.allowFullscreen = true;
-    reproductor.loading = "lazy";
-
-    if (tipo === "cancion") {
-      reproductor.height = "152";
-    }
-
-    return reproductor;
-
+      revisarCelebracionPorFecha();
+    });
   }
 
-  catch (error) {
+  /* -------------------------------------------------------
+     5. MÚSICA AMBIENTAL
+  ------------------------------------------------------- */
 
-    console.warn("Error al crear reproductor:", error);
+  const musicButton = document.getElementById("music-button");
+  const musicStatus = document.getElementById("music-status");
+  const musicContainer = document.getElementById("music-player-container");
+  let musicaActiva = false;
 
-    return crearElemento(
-      "p",
-      "gift-text",
-      "No pudimos cargar este contenido. Comprueba el enlace."
-    );
+  if (musicButton && musicContainer) {
+    musicButton.addEventListener("click", () => {
+      if (musicaActiva) {
+        musicContainer.replaceChildren();
+        musicaActiva = false;
+        musicButton.textContent = "♫ Activar música";
+        if (musicStatus) musicStatus.textContent = "La música está detenida. Puedes volver a escucharla cuando quieras.";
+        return;
+      }
 
+      const reproductor = document.createElement("iframe");
+      reproductor.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(persona.soundtrack)}?autoplay=1&controls=1&rel=0`;
+      reproductor.width = "100%";
+      reproductor.height = "180";
+      reproductor.title = `Soundtrack de ${persona.apodo}`;
+      reproductor.allow = "autoplay; encrypted-media; picture-in-picture";
+      reproductor.allowFullscreen = true;
+      reproductor.loading = "lazy";
+      reproductor.style.border = "0";
+      reproductor.style.borderRadius = "12px";
+
+      musicContainer.replaceChildren(reproductor);
+      musicaActiva = true;
+      musicButton.textContent = "♫ Detener música";
+      if (musicStatus) musicStatus.textContent = "Tu soundtrack está sonando.";
+    });
   }
 
-}
+  /* -------------------------------------------------------
+     6. MODAL Y RENDERIZADO DE REGALOS
+  ------------------------------------------------------- */
 
+  const modal = document.getElementById("surprise-modal");
+  const closeModalButton = document.getElementById("close-modal");
+  const modalDay = document.getElementById("modal-day");
+  const modalTitle = document.getElementById("modal-title");
+  const modalBody = document.getElementById("modal-body");
 
-/* =========================================================
-   11. RENDERIZADOR DE ELEMENTOS
-========================================================= */
+  function crearElemento(tag, clase, texto) {
+    const el = document.createElement(tag);
+    if (clase) el.className = clase;
+    if (texto !== undefined) el.textContent = texto;
+    return el;
+  }
 
-function renderizarElemento(elemento) {
+  function renderizarRegalo(dia) {
+    const datos = contenido[destinataria][dia - 1];
+    if (!datos || !modalBody) return;
 
-  switch (elemento.tipo) {
+    const [titulo, texto, tipo] = datos;
+    if (modalTitle) modalTitle.textContent = titulo;
+    modalBody.replaceChildren();
 
-    case "carta": {
-
-      const carta = crearElemento(
-        "div",
-        "gift-letter",
-        elemento.contenido
-      );
-
-      return carta;
-
-    }
-
-
-    case "texto": {
-
-      return crearElemento(
-        "p",
-        "gift-text",
-        elemento.contenido
-      );
-
-    }
-
-
-    case "encabezado": {
-
-      return crearElemento(
-        "h3",
-        "gift-heading",
-        elemento.contenido
-      );
-
-    }
-
-
-    case "cita": {
-
-      return crearElemento(
-        "blockquote",
-        "gift-quote",
-        elemento.contenido
-      );
-
-    }
-
-
-    case "foto": {
-
-      const imagen = document.createElement("img");
-
-      imagen.src = elemento.contenido;
-      imagen.alt =
-        elemento.descripcion || "Fotografía de la sorpresa";
-
-      imagen.className = "gift-photo";
-      imagen.loading = "lazy";
-
-      imagen.addEventListener("error", () => {
-        imagen.alt = "No se pudo cargar esta fotografía.";
-        imagen.hidden = true;
+    if (tipo === "carta") {
+      modalBody.appendChild(crearElemento("div", "gift-letter", texto));
+    } else if (tipo === "texto") {
+      modalBody.appendChild(crearElemento("p", "gift-text", texto));
+    } else if (tipo === "reto") {
+      const caja = crearElemento("div", "gift-coupon");
+      caja.appendChild(crearElemento("h3", "", "✦ Misión del día"));
+      caja.appendChild(crearElemento("p", "", texto));
+      caja.appendChild(crearElemento("small", "", "No hay respuestas incorrectas."));
+      modalBody.appendChild(caja);
+    } else if (tipo === "cupon") {
+      const caja = crearElemento("div", "gift-coupon");
+      caja.appendChild(crearElemento("h3", "", "VALE ESPECIAL"));
+      caja.appendChild(crearElemento("p", "", texto));
+      caja.appendChild(crearElemento("small", "", "Canjeable cuando quieras; solo debemos coordinarlo."));
+      modalBody.appendChild(caja);
+    } else if (tipo === "foto") {
+      const caja = crearElemento("div", "gift-photo-placeholder");
+      caja.appendChild(crearElemento("div", "photo-placeholder-icon", "▧"));
+      caja.appendChild(crearElemento("p", "gift-text", texto));
+      caja.appendChild(crearElemento("small", "", "ESPACIO RESERVADO PARA UNA FOTOGRAFÍA REAL"));
+      modalBody.appendChild(caja);
+    } else if (tipo === "galeria") {
+      const caja = crearElemento("div", "gift-gallery-placeholder");
+      caja.appendChild(crearElemento("p", "gift-text", texto));
+      const mosaico = crearElemento("div", "gallery-placeholder-grid");
+      for (let i = 1; i <= 3; i++) {
+        const marco = crearElemento("div", "gallery-placeholder-item", `Foto ${i}`);
+        mosaico.appendChild(marco);
+      }
+      caja.appendChild(mosaico);
+      caja.appendChild(crearElemento("small", "", "Las imágenes se añadirán cuando elijas las fotografías."));
+      modalBody.appendChild(caja);
+    } else if (tipo === "cancion") {
+      modalBody.appendChild(crearElemento("p", "gift-text", texto));
+      const iframe = document.createElement("iframe");
+      iframe.src = `https://www.youtube-nocookie.com/embed/${encodeURIComponent(persona.soundtrack)}?rel=0`;
+      iframe.title = `Canción para ${persona.apodo}`;
+      iframe.className = "gift-media";
+      iframe.height = "152";
+      iframe.allow = "autoplay; encrypted-media; picture-in-picture";
+      iframe.allowFullscreen = true;
+      iframe.loading = "lazy";
+      modalBody.appendChild(iframe);
+    } else if (tipo === "lista") {
+      const lista = crearElemento("div", "gift-letter");
+      texto.split("\n").forEach(linea => {
+        lista.appendChild(crearElemento("p", "gift-text", linea));
       });
-
-      return imagen;
-
+      modalBody.appendChild(lista);
+    } else if (tipo === "especial") {
+      const caja = crearElemento("div", "gift-letter special-letter");
+      caja.textContent = texto;
+      modalBody.appendChild(caja);
     }
 
+    // Pequeño pie de página consistente en todas las sorpresas.
+    modalBody.appendChild(crearElemento("p", "gift-signature", `Con cariño · ${persona.apodo}`));
+  }
 
-    case "galeria": {
+  function abrirSorpresa(dia) {
+    if (!modal || !modalBody) return;
 
-      const galeria = crearElemento("div", "gift-gallery");
+    if (modalDay) {
+      modalDay.textContent = `DÍA ${dia} · DICIEMBRE 2026`;
+    }
 
-      elemento.fotos.forEach(foto => {
+    renderizarRegalo(dia);
+    modal.hidden = false;
+    document.body.style.overflow = "hidden";
+  }
 
-        const imagen = document.createElement("img");
+  function cerrarSorpresa() {
+    if (!modal) return;
+    modal.hidden = true;
+    document.body.style.overflow = "";
+  }
 
-        imagen.src = foto.url;
-        imagen.alt = foto.descripcion || "Fotografía de la galería";
-        imagen.loading = "lazy";
+  if (closeModalButton) {
+    closeModalButton.addEventListener("click", cerrarSorpresa);
+  }
 
-        imagen.addEventListener("error", () => {
-          imagen.hidden = true;
+  if (modal) {
+    modal.addEventListener("click", evento => {
+      if (evento.target === modal) cerrarSorpresa();
+    });
+  }
+
+  document.addEventListener("keydown", evento => {
+    if (evento.key === "Escape" && modal && !modal.hidden) cerrarSorpresa();
+  });
+
+  /* -------------------------------------------------------
+     7. EFECTOS ESPECIALES: NAVIDAD Y AÑO NUEVO
+  ------------------------------------------------------- */
+
+  const estilosEspeciales = document.createElement("style");
+  estilosEspeciales.textContent = `
+    .door.door-special {
+      position: relative;
+      overflow: visible;
+      border: 1px solid var(--primary, #d7a9a0);
+      box-shadow: 0 0 0 2px rgba(255,255,255,.08), 0 0 18px rgba(220,180,130,.22);
+    }
+    .door.door-special::after {
+      content: "✦";
+      position: absolute;
+      top: -9px;
+      right: -6px;
+      font-size: 15px;
+      color: var(--primary, #f0c6cf);
+      text-shadow: 0 0 10px currentColor;
+    }
+    .gift-photo-placeholder, .gift-gallery-placeholder {
+      padding: 18px;
+      margin: 12px 0;
+      text-align: center;
+      border: 1px dashed var(--secondary, #d7a9a0);
+      border-radius: 16px;
+      background: rgba(255,255,255,.045);
+    }
+    .photo-placeholder-icon {
+      font-size: 42px;
+      opacity: .8;
+      margin-bottom: 8px;
+    }
+    .gift-photo-placeholder small, .gift-gallery-placeholder small {
+      display: block;
+      margin-top: 12px;
+      font-size: 10px;
+      letter-spacing: .12em;
+      opacity: .7;
+    }
+    .gallery-placeholder-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 14px;
+    }
+    .gallery-placeholder-item {
+      aspect-ratio: 1 / 1.15;
+      display: grid;
+      place-items: center;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,.2);
+      background: linear-gradient(145deg, rgba(255,255,255,.13), rgba(255,255,255,.025));
+      font-size: 12px;
+    }
+    .gift-signature {
+      text-align: right;
+      opacity: .7;
+      font-size: 12px;
+      margin-top: 18px;
+      font-style: italic;
+    }
+    .celebration-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 99999;
+      display: grid;
+      place-items: center;
+      padding: 22px;
+      overflow: hidden;
+      background: radial-gradient(circle at 50% 35%, rgba(93,60,91,.94), rgba(13,10,20,.98) 68%);
+      color: #fff8ef;
+      animation: celebrationFade .8s ease both;
+    }
+    .celebration-overlay.new-year {
+      background: radial-gradient(circle at 50% 35%, rgba(40,55,91,.94), rgba(8,10,24,.99) 70%);
+    }
+    .celebration-card {
+      position: relative;
+      z-index: 2;
+      width: min(560px, 100%);
+      padding: 34px 24px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,.28);
+      border-radius: 24px;
+      background: rgba(255,255,255,.09);
+      box-shadow: 0 25px 90px rgba(0,0,0,.35);
+      backdrop-filter: blur(14px);
+      animation: celebrationRise 1s cubic-bezier(.2,.8,.2,1) both;
+    }
+    .celebration-kicker {
+      margin: 0 0 14px;
+      letter-spacing: .24em;
+      font-size: 10px;
+      text-transform: uppercase;
+      opacity: .8;
+    }
+    .celebration-title {
+      margin: 0 0 16px;
+      font-family: Georgia, serif;
+      font-size: clamp(36px, 10vw, 66px);
+      line-height: 1;
+      font-weight: 400;
+    }
+    .celebration-message {
+      max-width: 420px;
+      margin: 0 auto 22px;
+      line-height: 1.7;
+      font-size: 15px;
+      color: rgba(255,248,239,.92);
+    }
+    .celebration-close {
+      padding: 12px 22px;
+      border: 1px solid rgba(255,255,255,.55);
+      border-radius: 999px;
+      background: rgba(255,255,255,.12);
+      color: #fff8ef;
+      cursor: pointer;
+      font: inherit;
+    }
+    .celebration-close:hover { background: rgba(255,255,255,.22); }
+    .celebration-sparkle {
+      position: absolute;
+      color: #f5d9a8;
+      opacity: 0;
+      pointer-events: none;
+      animation: sparkleFloat 3.5s ease-in-out infinite;
+    }
+    .celebration-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+    }
+    @keyframes celebrationFade { from {opacity:0} to {opacity:1} }
+    @keyframes celebrationRise {
+      from {opacity:0; transform:translateY(24px) scale(.96)}
+      to {opacity:1; transform:translateY(0) scale(1)}
+    }
+    @keyframes sparkleFloat {
+      0%,100% {opacity:0; transform:translateY(12px) scale(.6) rotate(0deg)}
+      45% {opacity:.9}
+      70% {opacity:.5; transform:translateY(-22px) scale(1.1) rotate(45deg)}
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .celebration-overlay, .celebration-card, .celebration-sparkle { animation: none !important; }
+    }
+  `;
+  document.head.appendChild(estilosEspeciales);
+
+  let celebracionActiva = false;
+  let animacionFuegos = null;
+
+  function crearFuegosArtificiales(canvas) {
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return () => {};
+
+    let ancho = canvas.width = window.innerWidth * devicePixelRatio;
+    let alto = canvas.height = window.innerHeight * devicePixelRatio;
+    canvas.style.width = `${window.innerWidth}px`;
+    canvas.style.height = `${window.innerHeight}px`;
+    ctx.scale(devicePixelRatio, devicePixelRatio);
+
+    const particulas = [];
+    const colores = ["#f7d794", "#f5b7c8", "#d8c4ff", "#ffffff", "#a9d8ff", "#f3a683"];
+
+    function lanzarCohete() {
+      const x = Math.random() * window.innerWidth;
+      const y = window.innerHeight * (0.18 + Math.random() * 0.42);
+      const color = colores[Math.floor(Math.random() * colores.length)];
+      for (let i = 0; i < 58; i++) {
+        const angulo = (Math.PI * 2 * i) / 58;
+        const velocidad = 1.2 + Math.random() * 3.3;
+        particulas.push({
+          x, y,
+          vx: Math.cos(angulo) * velocidad,
+          vy: Math.sin(angulo) * velocidad,
+          vida: 70 + Math.random() * 35,
+          maxVida: 105,
+          color,
+          radio: 1 + Math.random() * 2
         });
-
-        galeria.appendChild(imagen);
-
-      });
-
-      return galeria;
-
+      }
     }
 
+    let cuadros = 0;
+    function dibujar() {
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+      cuadros++;
 
-    case "cancion": {
+      if (cuadros % 38 === 0) lanzarCohete();
 
-      return crearReproductor(
-        elemento.contenido,
-        "cancion"
-      );
+      for (let i = particulas.length - 1; i >= 0; i--) {
+        const p = particulas[i];
+        p.x += p.vx;
+        p.y += p.vy;
+        p.vy += 0.018;
+        p.vx *= 0.992;
+        p.vy *= 0.992;
+        p.vida--;
 
+        ctx.globalAlpha = Math.max(0, p.vida / p.maxVida);
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (p.vida <= 0) particulas.splice(i, 1);
+      }
+      ctx.globalAlpha = 1;
+      animacionFuegos = requestAnimationFrame(dibujar);
     }
 
+    lanzarCohete();
+    dibujar();
 
-    case "video": {
+    return () => {
+      if (animacionFuegos) cancelAnimationFrame(animacionFuegos);
+      animacionFuegos = null;
+      ctx.clearRect(0, 0, window.innerWidth, window.innerHeight);
+    };
+  }
 
-      return crearReproductor(
-        elemento.contenido,
-        "video"
-      );
+  function mostrarCelebracion(tipo) {
+    if (celebracionActiva) return;
+    celebracionActiva = true;
 
+    const navidad = tipo === "navidad";
+    const overlay = crearElemento(
+      "section",
+      `celebration-overlay${navidad ? "" : " new-year"}`
+    );
+    overlay.setAttribute("role", "dialog");
+    overlay.setAttribute("aria-modal", "true");
+    overlay.setAttribute("aria-label", navidad ? "Celebración de Navidad" : "Celebración de Año Nuevo");
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "celebration-canvas";
+    overlay.appendChild(canvas);
+
+    const card = crearElemento("div", "celebration-card");
+    const kicker = crearElemento("p", "celebration-kicker",
+      navidad ? "25 DE DICIEMBRE · 00:00" : "1 DE ENERO · 00:00");
+    const title = crearElemento("h2", "celebration-title",
+      navidad ? "Feliz Navidad" : "Feliz Año Nuevo");
+    const message = crearElemento("p", "celebration-message",
+      navidad
+        ? persona.saludoNavidad
+        : persona.saludoAnio);
+    const extra = crearElemento("p", "celebration-message",
+      navidad
+        ? "Que esta noche esté llena de calma, cariño y momentos que merezcan quedarse en la memoria."
+        : "Un nuevo capítulo empieza. Gracias por haber formado parte de este año y por todo lo bonito que todavía puede venir.");
+    const cerrar = crearElemento("button", "celebration-close",
+      navidad ? "Guardar este momento" : "Comenzar el nuevo capítulo");
+    cerrar.type = "button";
+
+    card.append(kicker, title, message, extra, cerrar);
+    overlay.appendChild(card);
+
+    // Destellos decorativos en posiciones variadas.
+    for (let i = 0; i < 18; i++) {
+      const estrella = crearElemento("span", "celebration-sparkle", i % 2 ? "✦" : "✧");
+      estrella.style.left = `${Math.random() * 96 + 2}%`;
+      estrella.style.top = `${Math.random() * 92 + 4}%`;
+      estrella.style.animationDelay = `${Math.random() * 2.5}s`;
+      estrella.style.fontSize = `${10 + Math.random() * 18}px`;
+      overlay.appendChild(estrella);
     }
 
+    document.body.appendChild(overlay);
+    const detenerFuegos = crearFuegosArtificiales(canvas);
 
-    case "cupon": {
+    function cerrarOverlay() {
+      detenerFuegos();
+      overlay.remove();
+      document.body.style.overflow = "";
+      celebracionActiva = false;
+    }
 
-      const cupon = crearElemento("div", "gift-coupon");
+    cerrar.addEventListener("click", cerrarOverlay);
+    overlay.addEventListener("keydown", e => {
+      if (e.key === "Escape") cerrar();
+    });
+    document.body.style.overflow = "hidden";
+  }
 
-      const titulo = crearElemento(
-        "h3",
-        "",
-        elemento.contenido
-      );
+  function fechaBogota() {
+    const partes = new Intl.DateTimeFormat("en-US", {
+      timeZone: "America/Bogota",
+      year: "numeric",
+      month: "numeric",
+      day: "numeric"
+    }).formatToParts(new Date());
 
-      const descripcion = crearElemento(
-        "p",
-        "",
-        elemento.descripcion || ""
-      );
+    return {
+      anio: Number(partes.find(p => p.type === "year").value),
+      mes: Number(partes.find(p => p.type === "month").value),
+      dia: Number(partes.find(p => p.type === "day").value)
+    };
+  }
 
-      cupon.appendChild(titulo);
-      cupon.appendChild(descripcion);
+  function revisarCelebracionPorFecha() {
+    // La celebración se muestra cuando la persona ya entró al calendario.
+    if (calendarScreen && calendarScreen.hidden) return;
 
-      if (elemento.nota) {
+    const fecha = fechaBogota();
 
-        cupon.appendChild(
-          crearElemento("small", "", elemento.nota)
-        );
+    if (demoEspecial === "navidad") {
+      mostrarUnaVez("demo-navidad", () => mostrarCelebracion("navidad"));
+      return;
+    }
+    if (demoEspecial === "ano-nuevo") {
+      mostrarUnaVez("demo-ano-nuevo", () => mostrarCelebracion("ano-nuevo"));
+      return;
+    }
 
+    // Si la persona entra el 25 de diciembre o el 1 de enero,
+    // verá el saludo aunque no tuviera la página abierta justo a medianoche.
+    if (fecha.mes === 12 && fecha.dia === 25) {
+      mostrarUnaVez("navidad", () => mostrarCelebracion("navidad"));
+    } else if (fecha.mes === 1 && fecha.dia === 1) {
+      mostrarUnaVez("ano-nuevo", () => mostrarCelebracion("ano-nuevo"));
+    }
+  }
+
+  const celebracionesVistas = new Set();
+
+  function mostrarUnaVez(clave, accion) {
+    if (celebracionesVistas.has(clave)) return;
+
+    const llave = `calendario-2026-${destinataria}-${clave}`;
+    try {
+      if (sessionStorage.getItem(llave) === "si") {
+        celebracionesVistas.add(clave);
+        return;
+      }
+      sessionStorage.setItem(llave, "si");
+    } catch (error) {
+      // Si el navegador bloquea sessionStorage, se usa el control en memoria.
+    }
+
+    celebracionesVistas.add(clave);
+    accion();
+  }
+
+  // Detecta el cambio de fecha aunque el calendario permanezca abierto.
+  revisarCelebracionPorFecha();
+  window.setInterval(revisarCelebracionPorFecha, 15000);
+
+  /* -------------------------------------------------------
+     8. CREAR LAS 31 PUERTAS Y CONTROLAR FECHAS
+  ------------------------------------------------------- */
+
+  const calendar = document.getElementById("calendar");
+
+  function diaDisponible(dia) {
+    if (MODO_PRUEBA) return true;
+
+    const fecha = fechaBogota();
+
+    // Antes de diciembre de 2026, no se abre ninguna puerta.
+    if (fecha.anio < 2026) return false;
+    if (fecha.anio === 2026 && fecha.mes < 12) return false;
+
+    // Durante diciembre de 2026, solo se abren los días alcanzados.
+    if (fecha.anio === 2026 && fecha.mes === 12) {
+      return dia <= fecha.dia;
+    }
+
+    // Desde enero de 2027 el calendario queda como recuerdo abierto.
+    return fecha.anio > 2026 || (fecha.anio === 2026 && fecha.mes > 12);
+  }
+
+  if (calendar) {
+    calendar.replaceChildren();
+
+    for (let dia = 1; dia <= 31; dia++) {
+      const puerta = document.createElement("button");
+      puerta.className = "door";
+      puerta.type = "button";
+      puerta.textContent = String(dia);
+      puerta.setAttribute("aria-label", `Abrir regalo del día ${dia}`);
+
+      if (dia === 25 || dia === 31) {
+        puerta.classList.add("door-special");
+        puerta.setAttribute("aria-label", dia === 25
+          ? "Regalo especial de Navidad, día 25"
+          : "Regalo especial de cierre, día 31");
       }
 
-      return cupon;
+      const disponible = diaDisponible(dia);
+      puerta.disabled = !disponible;
 
-    }
-
-
-    case "enlace": {
-
-      try {
-
-        const url = new URL(elemento.contenido);
-
-        if (url.protocol !== "https:") {
-          throw new Error("Enlace no seguro.");
-        }
-
-        const enlace = document.createElement("a");
-
-        enlace.href = url.href;
-        enlace.target = "_blank";
-        enlace.rel = "noopener noreferrer";
-
-        enlace.className = "gift-link";
-        enlace.textContent =
-          elemento.texto || "Descubrir sorpresa →";
-
-        return enlace;
-
+      if (disponible) {
+        puerta.addEventListener("click", () => abrirSorpresa(dia));
       }
 
-      catch (error) {
-
-        console.warn("Enlace inválido:", error);
-
-        return crearElemento(
-          "p",
-          "gift-text",
-          "Este enlace no está disponible."
-        );
-
-      }
-
+      calendar.appendChild(puerta);
     }
-
-
-    default: {
-
-      console.warn(
-        "Tipo de regalo desconocido:",
-        elemento.tipo
-      );
-
-      return null;
-
-    }
-
   }
 
-}
-
-
-/* =========================================================
-   12. APERTURA DE REGALOS
-========================================================= */
-
-let modalAnterior = null;
-
-function abrirSorpresa(dia) {
-
-  const regalo = regalos[destinataria]?.[dia];
-
-  if (!regalo) {
-    mostrarNotificacion("Esta sorpresa todavía no está disponible.");
-    return;
-  }
-
-  if (!diaDesbloqueado(dia)) {
-    mostrarNotificacion("Todavía no ha llegado el día de esta sorpresa.");
-    return;
-  }
-
-  modalDay.textContent =
-    `DÍA ${dia} · DICIEMBRE 2026`;
-
-  modalTitle.textContent = regalo.titulo;
-
-  modalBody.replaceChildren();
-
-  regalo.elementos.forEach(elemento => {
-
-    const nodo = renderizarElemento(elemento);
-
-    if (nodo) {
-      modalBody.appendChild(nodo);
-    }
-
-  });
-
-  if (modalFooterMessage) {
-    modalFooterMessage.textContent = persona.mensajeFinal;
-  }
-
-  modalAnterior = document.activeElement;
-
-  modal.hidden = false;
-
-  document.body.style.overflow = "hidden";
-
-  closeModalButton.focus();
-
-}
-
-
-function cerrarSorpresa() {
-
-  if (modal.hidden) return;
-
-  // Detener videos y canciones al cerrar el regalo.
-  modalBody.querySelectorAll("iframe").forEach(iframe => {
-    iframe.src = "about:blank";
-  });
-
-  modal.hidden = true;
-
-  document.body.style.overflow = "";
-
-  if (modalAnterior && typeof modalAnterior.focus === "function") {
-    modalAnterior.focus();
-  }
-
-}
-
-
-/* =========================================================
-   13. EVENTOS DEL MODAL
-========================================================= */
-
-closeModalButton.addEventListener(
-  "click",
-  cerrarSorpresa
-);
-
-modal.addEventListener("click", evento => {
-
-  if (
-    evento.target === modal ||
-    evento.target.classList.contains("modal-backdrop")
-  ) {
-    cerrarSorpresa();
-  }
-
-});
-
-
-document.addEventListener("keydown", evento => {
-
-  if (modal.hidden) return;
-
-  if (evento.key === "Escape") {
-    cerrarSorpresa();
-  }
-
-  // Mantener el foco dentro de la ventana.
-  if (evento.key === "Tab") {
-
-    const controles = modal.querySelectorAll(
-      'button:not([disabled]), a[href], iframe'
-    );
-
-    if (!controles.length) return;
-
-    const primero = controles[0];
-    const ultimo = controles[controles.length - 1];
-
-    if (evento.shiftKey && document.activeElement === primero) {
-      evento.preventDefault();
-      ultimo.focus();
-    }
-
-    else if (
-      !evento.shiftKey &&
-      document.activeElement === ultimo
-    ) {
-      evento.preventDefault();
-      primero.focus();
-    }
-
-  }
-
-});
-
-
-/* =========================================================
-   14. CREACIÓN DE LAS 31 PUERTAS
-========================================================= */
-
-function construirCalendario() {
-
-  calendar.replaceChildren();
-
-  for (let dia = 1; dia <= CONFIG.dias; dia++) {
-
-    const puerta = document.createElement("button");
-
-    puerta.type = "button";
-    puerta.className = "door";
-
-    puerta.textContent = dia;
-
-    puerta.setAttribute(
-      "aria-label",
-      `Día ${dia} de diciembre`
-    );
-
-    const disponible = diaDesbloqueado(dia);
-
-    puerta.disabled = !disponible;
-
-    if (disponible) {
-
-      puerta.addEventListener("click", () => {
-        abrirSorpresa(dia);
-      });
-
-    }
-
-    else {
-
-      puerta.setAttribute(
-        "aria-label",
-        `Día ${dia}, todavía bloqueado`
-      );
-
-    }
-
-    calendar.appendChild(puerta);
-
-  }
-
-}
-
-construirCalendario();
-
-
-/* =========================================================
-   15. BARRA DE PROGRESO
-========================================================= */
-
-function actualizarProgreso() {
-
-  const desbloqueados = Array.from(
-    { length: CONFIG.dias },
-    (_, indice) => indice + 1
-  ).filter(dia => diaDesbloqueado(dia)).length;
-
-  const porcentaje =
-    (desbloqueados / CONFIG.dias) * 100;
-
-  if (progressFill) {
-    progressFill.style.width = `${porcentaje}%`;
-  }
-
-  if (progressCount) {
-    progressCount.textContent =
-      `${desbloqueados} de ${CONFIG.dias} días`;
-  }
-
-  if (progressBar) {
-
-    progressBar.setAttribute(
-      "aria-valuenow",
-      String(desbloqueados)
-    );
-
-  }
-
-  if (progressLabel) {
-
-    progressLabel.textContent =
-      desbloqueados === 31
-        ? "¡Has completado el calendario!"
-        : "Tu recorrido";
-
-  }
-
-}
-
-
-/* =========================================================
-   16. MÚSICA AMBIENTAL
-========================================================= */
-
-let musicaActiva = false;
-
-function detenerMusica() {
-
-  musicContainer.replaceChildren();
-
-  musicaActiva = false;
-
-  musicButton.setAttribute("aria-pressed", "false");
-
-  musicButtonText.textContent = "Activar música";
-
-  musicStatus.textContent =
-    "La música está detenida. Puedes volver a escucharla cuando quieras.";
-
-}
-
-
-function activarMusica() {
-
-  const videoId = persona.soundtrack;
-
-  if (!/^[a-zA-Z0-9_-]{11}$/.test(videoId)) {
-
-    musicStatus.textContent =
-      "No se encontró una banda sonora válida.";
-
-    return;
-
-  }
-
-  const reproductor = document.createElement("iframe");
-
-  reproductor.src =
-    `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&controls=1&rel=0`;
-
-  reproductor.title =
-    `Banda sonora de ${persona.nombre}`;
-
-  reproductor.width = "100%";
-  reproductor.height = "180";
-
-  reproductor.allow =
-    "autoplay; encrypted-media; picture-in-picture";
-
-  reproductor.allowFullscreen = true;
-  reproductor.loading = "lazy";
-
-  musicContainer.replaceChildren(reproductor);
-
-  musicaActiva = true;
-
-  musicButton.setAttribute("aria-pressed", "true");
-
-  musicButtonText.textContent = "Detener música";
-
-  musicStatus.textContent =
-    "Tu banda sonora está lista para acompañarte.";
-
-}
-
-
-musicButton.addEventListener("click", () => {
-
-  if (musicaActiva) {
-    detenerMusica();
-  }
-
-  else {
-    activarMusica();
-  }
-
-});
-
-
-/* =========================================================
-   17. MOSTRAR Y OCULTAR CONTRASEÑA
-========================================================= */
-
-togglePassword.addEventListener("click", () => {
-
-  const mostrar = passwordInput.type === "password";
-
-  passwordInput.type = mostrar ? "text" : "password";
-
-  togglePassword.setAttribute(
-    "aria-pressed",
-    String(mostrar)
-  );
-
-  togglePassword.setAttribute(
-    "aria-label",
-    mostrar
-      ? "Ocultar contraseña"
-      : "Mostrar contraseña"
-  );
-
-});
-
-
-/* =========================================================
-   18. NOTIFICACIONES
-========================================================= */
-
-let temporizadorNotificacion = null;
-
-function mostrarNotificacion(mensaje) {
-
-  if (!notification) return;
-
-  notification.textContent = mensaje;
-
-  notification.hidden = false;
-
-  if (temporizadorNotificacion) {
-    clearTimeout(temporizadorNotificacion);
-  }
-
-  temporizadorNotificacion = setTimeout(() => {
-    notification.hidden = true;
-  }, 3500);
-
-}
-
-
-/* =========================================================
-   19. ACTUALIZACIÓN DE FECHAS
-========================================================= */
-
-/*
-  Recalcula las puertas y el progreso cuando la página
-  vuelve a estar visible.
-
-  No utiliza el reloj del servidor.
-*/
-
-document.addEventListener("visibilitychange", () => {
-
-  if (!document.hidden) {
-
-    construirCalendario();
-    actualizarProgreso();
-
-  }
-
-});
-
-
-/* =========================================================
-   20. INICIALIZACIÓN
-========================================================= */
-
-actualizarProgreso();
-
-console.info(
-  `%c31 DÍAS CONTIGO · ${persona.nombre}`,
-  "font-size:16px;font-weight:bold;color:#C77D7E;"
-);
-
-console.info(
-  "Calendario cargado correctamente."
-);
-
+  /* -------------------------------------------------------
+     9. ACCESO DIRECTO PARA PROBAR EFECTOS
+  ------------------------------------------------------- */
+
+  // Los enlaces de prueba son:
+  // ?para=milena&demo=navidad
+  // ?para=laura&demo=ano-nuevo
+  // Cambia el valor de "para" para probar cada calendario.
+
+})();
