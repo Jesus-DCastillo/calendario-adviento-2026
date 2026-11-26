@@ -213,7 +213,7 @@ $("#login-description").textContent =
 const CONFIG = {
   // true permite abrir los 31 días durante las pruebas.
   // Cambiar a false antes de compartir el calendario.
-  modoPrueba: true,
+  modoPrueba: false,
   anio: 2026,
   mes: 12,
   dias: 31
