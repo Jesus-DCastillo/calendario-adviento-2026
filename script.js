@@ -1,4 +1,4 @@
-/* =========================================================
+/* ===============================================
    31 DÍAS CONTIGO
    SISTEMA PRINCIPAL · DICIEMBRE 2026
    Tres calendarios · 93 regalos · Experiencia personalizada
@@ -14,6 +14,7 @@
 const parametros = new URLSearchParams(window.location.search);
 
 const destinatariaSolicitada = parametros.get("para") || "milena";
+const demoEspecial = parametros.get("demo");
 
 const calendarios = {
 
@@ -204,47 +205,88 @@ $("#login-description").textContent =
 
 /*
   IMPORTANTE:
-  El acceso actual es una demostración.
-  No constituye autenticación ni protección de contenido.
-
-  El cifrado real se incorporará antes de subir
-  fotografías y mensajes privados.
+  Este acceso con contraseña es una barrera visual básica.
+  No cifra ni protege realmente el contenido del JavaScript.
+  No incluyas información privada hasta implementar cifrado real.
 */
 
 const CONFIG = {
+  // true permite abrir los 31 días durante las pruebas.
+  // Cambiar a false antes de compartir el calendario.
   modoPrueba: true,
-  permitirAccesoSinContrasena: true,
   anio: 2026,
   mes: 12,
   dias: 31
 };
 
+const accesos = {
+  milena: {
+    contrasena: "primersemestre",
+    pista: "La etapa en la que comenzó esta amistad y todo lo que vino después."
+  },
+  laura: {
+    contrasena: "patinodecine",
+    pista: "Una broma recurrente sobre un plan de cine que todavía nos espera."
+  },
+  luisa: {
+    contrasena: "futurohipotetico",
+    pista: "Una posibilidad imaginaria con demasiados capítulos por escribir."
+  }
+};
+
 let calendarioAbierto = false;
 
-passwordInput.disabled = true;
-passwordInput.placeholder = "Acceso privado en preparación";
+function normalizarContrasena(texto) {
+  return texto
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, "");
+}
 
-$("#password-label").textContent =
-  "Tu sorpresa está esperando";
+function configurarAcceso() {
+  const acceso = accesos[destinataria];
 
-togglePassword.hidden = true;
+  passwordInput.disabled = false;
+  passwordInput.required = true;
+  passwordInput.type = "password";
+  passwordInput.placeholder = "Escribe tu respuesta...";
 
-enterButton.textContent = "Descubrir mi calendario";
+  $("#password-label").textContent = "Resuelve la pista para entrar";
+  $("#login-description").textContent = acceso.pista;
+
+  togglePassword.hidden = false;
+  enterButton.textContent = "Descubrir mi calendario";
+
+  if (loginMessage) {
+    loginMessage.textContent = "";
+  }
+}
 
 loginForm.addEventListener("submit", (evento) => {
   evento.preventDefault();
 
-  if (!CONFIG.permitirAccesoSinContrasena) {
-    loginMessage.textContent =
-      "El sistema de acceso todavía no está configurado.";
+  const respuesta = normalizarContrasena(passwordInput.value);
+  const correcta = normalizarContrasena(accesos[destinataria].contrasena);
+
+  if (!respuesta) {
+    loginMessage.textContent = "Primero debes resolver la pista.";
     return;
   }
 
+  if (respuesta !== correcta) {
+    loginMessage.textContent = "Esa no es la respuesta. Inténtalo otra vez.";
+    passwordInput.value = "";
+    passwordInput.focus();
+    return;
+  }
+
+  loginMessage.textContent = "";
   abrirCalendario();
 });
 
 function abrirCalendario() {
-
   if (calendarioAbierto) return;
 
   calendarioAbierto = true;
@@ -258,7 +300,11 @@ function abrirCalendario() {
     top: 0,
     behavior: "smooth"
   });
+
+  revisarCelebracionPorFecha();
 }
+
+configurarAcceso();
 
 
 /* =========================================================
@@ -1408,6 +1454,14 @@ function construirCalendario() {
     puerta.type = "button";
     puerta.className = "door";
 
+    if (dia === 25 || dia === 31) {
+      puerta.classList.add("door-special");
+      puerta.setAttribute(
+        "aria-label",
+        dia === 25 ? "Día 25, especial de Navidad" : "Día 31, cierre de año"
+      );
+    }
+
     puerta.textContent = dia;
 
     puerta.setAttribute(
@@ -1642,7 +1696,324 @@ document.addEventListener("visibilitychange", () => {
 
 
 /* =========================================================
-   20. INICIALIZACIÓN
+   20. CELEBRACIONES ESPECIALES: NAVIDAD Y AÑO NUEVO
+========================================================= */
+
+const estilosCelebracion = document.createElement("style");
+estilosCelebracion.textContent = `
+  .celebration-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    overflow: hidden;
+    color: #fff8ef;
+    background: radial-gradient(circle at 50% 35%, #68465f 0%, #17101f 72%);
+    animation: celebrationFade .8s ease both;
+  }
+  .celebration-overlay.new-year {
+    background: radial-gradient(circle at 50% 35%, #354a76 0%, #080d20 72%);
+  }
+  .celebration-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+  }
+  .celebration-card {
+    position: relative;
+    z-index: 2;
+    width: min(560px, 100%);
+    padding: 36px 25px;
+    text-align: center;
+    border: 1px solid rgba(255,255,255,.28);
+    border-radius: 24px;
+    background: rgba(255,255,255,.10);
+    box-shadow: 0 25px 90px rgba(0,0,0,.35);
+    backdrop-filter: blur(14px);
+    animation: celebrationRise 1s cubic-bezier(.2,.8,.2,1) both;
+  }
+  .celebration-kicker {
+    margin: 0 0 16px;
+    letter-spacing: .22em;
+    font-size: 10px;
+    text-transform: uppercase;
+    opacity: .85;
+  }
+  .celebration-title {
+    margin: 0 0 18px;
+    font-family: Georgia, serif;
+    font-size: clamp(38px, 10vw, 68px);
+    line-height: 1.05;
+    font-weight: 400;
+  }
+  .celebration-message {
+    max-width: 430px;
+    margin: 0 auto 18px;
+    line-height: 1.75;
+    font-size: 15px;
+  }
+  .celebration-close {
+    margin-top: 8px;
+    padding: 12px 24px;
+    border: 1px solid rgba(255,255,255,.6);
+    border-radius: 999px;
+    background: rgba(255,255,255,.13);
+    color: #fff8ef;
+    cursor: pointer;
+    font: inherit;
+  }
+  .celebration-close:hover { background: rgba(255,255,255,.24); }
+  .celebration-sparkle {
+    position: absolute;
+    color: #f5d9a8;
+    pointer-events: none;
+    animation: sparkleFloat 3.5s ease-in-out infinite;
+  }
+  @keyframes celebrationFade { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes celebrationRise {
+    from { opacity: 0; transform: translateY(24px) scale(.96); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes sparkleFloat {
+    0%,100% { opacity: 0; transform: translateY(12px) scale(.6) rotate(0); }
+    45% { opacity: .9; }
+    70% { opacity: .5; transform: translateY(-22px) scale(1.1) rotate(45deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .celebration-overlay, .celebration-card, .celebration-sparkle { animation: none !important; }
+  }
+`;
+document.head.appendChild(estilosCelebracion);
+
+let celebracionActiva = false;
+let animacionFuegos = null;
+const celebracionesVistas = new Set();
+
+function crearFuegosArtificiales(canvas) {
+  const contexto = canvas.getContext("2d");
+  if (!contexto) return () => {};
+
+  const escala = Math.min(window.devicePixelRatio || 1, 2);
+  let ancho = window.innerWidth;
+  let alto = window.innerHeight;
+
+  function ajustarCanvas() {
+    ancho = window.innerWidth;
+    alto = window.innerHeight;
+    canvas.width = Math.floor(ancho * escala);
+    canvas.height = Math.floor(alto * escala);
+    canvas.style.width = `${ancho}px`;
+    canvas.style.height = `${alto}px`;
+    contexto.setTransform(escala, 0, 0, escala, 0, 0);
+  }
+
+  ajustarCanvas();
+  window.addEventListener("resize", ajustarCanvas);
+
+  const particulas = [];
+  const colores = ["#f7d794", "#f5b7c8", "#d8c4ff", "#ffffff", "#a9d8ff", "#f3a683"];
+
+  function lanzarExplosion() {
+    const x = Math.random() * ancho;
+    const y = alto * (0.15 + Math.random() * 0.45);
+    const color = colores[Math.floor(Math.random() * colores.length)];
+    const cantidad = 65;
+
+    for (let i = 0; i < cantidad; i++) {
+      const angulo = (Math.PI * 2 * i) / cantidad;
+      const velocidad = 1 + Math.random() * 3.5;
+      particulas.push({
+        x, y,
+        vx: Math.cos(angulo) * velocidad,
+        vy: Math.sin(angulo) * velocidad,
+        vida: 65 + Math.random() * 40,
+        vidaMaxima: 105,
+        radio: 1 + Math.random() * 2,
+        color
+      });
+    }
+  }
+
+  let cuadros = 0;
+  let activo = true;
+
+  function dibujar() {
+    if (!activo) return;
+
+    contexto.clearRect(0, 0, ancho, alto);
+    cuadros++;
+
+    if (cuadros % 38 === 0) lanzarExplosion();
+
+    for (let i = particulas.length - 1; i >= 0; i--) {
+      const p = particulas[i];
+      p.x += p.vx;
+      p.y += p.vy;
+      p.vy += 0.018;
+      p.vx *= 0.992;
+      p.vy *= 0.992;
+      p.vida--;
+
+      contexto.globalAlpha = Math.max(0, p.vida / p.vidaMaxima);
+      contexto.fillStyle = p.color;
+      contexto.beginPath();
+      contexto.arc(p.x, p.y, p.radio, 0, Math.PI * 2);
+      contexto.fill();
+
+      if (p.vida <= 0) particulas.splice(i, 1);
+    }
+
+    contexto.globalAlpha = 1;
+    animacionFuegos = requestAnimationFrame(dibujar);
+  }
+
+  lanzarExplosion();
+  lanzarExplosion();
+  dibujar();
+
+  return () => {
+    activo = false;
+    if (animacionFuegos) cancelAnimationFrame(animacionFuegos);
+    animacionFuegos = null;
+    window.removeEventListener("resize", ajustarCanvas);
+    contexto.clearRect(0, 0, ancho, alto);
+  };
+}
+
+function mostrarCelebracion(tipo) {
+  if (celebracionActiva) return;
+  celebracionActiva = true;
+
+  const esNavidad = tipo === "navidad";
+  const overlay = document.createElement("section");
+  overlay.className = `celebration-overlay${esNavidad ? "" : " new-year"}`;
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", esNavidad ? "Celebración de Navidad" : "Celebración de Año Nuevo");
+
+  const canvas = document.createElement("canvas");
+  canvas.className = "celebration-canvas";
+  overlay.appendChild(canvas);
+
+  const card = document.createElement("div");
+  card.className = "celebration-card";
+
+  const kicker = crearElemento(
+    "p",
+    "celebration-kicker",
+    esNavidad ? "25 DE DICIEMBRE · 00:00" : "1 DE ENERO · 00:00"
+  );
+
+  const title = crearElemento(
+    "h2",
+    "celebration-title",
+    esNavidad ? "Feliz Navidad" : "Feliz Año Nuevo"
+  );
+
+  const mensajePersonal = esNavidad
+    ? `${persona.nombre}, espero que esta Navidad te regale tranquilidad, cariño y momentos que merezcan quedarse en la memoria.`
+    : `${persona.nombre}, un nuevo capítulo empieza. Gracias por formar parte de este año y por todo lo bonito que todavía puede venir.`;
+
+  const message = crearElemento("p", "celebration-message", mensajePersonal);
+
+  const extra = crearElemento(
+    "p",
+    "celebration-message",
+    esNavidad
+      ? "Que esta noche esté llena de calma, cariño y momentos que merezcan quedarse."
+      : persona.mensajeFinal
+  );
+
+  const cerrar = crearElemento(
+    "button",
+    "celebration-close",
+    esNavidad ? "Guardar este momento" : "Comenzar el nuevo capítulo"
+  );
+  cerrar.type = "button";
+
+  card.append(kicker, title, message, extra, cerrar);
+  overlay.appendChild(card);
+
+  for (let i = 0; i < 20; i++) {
+    const estrella = crearElemento("span", "celebration-sparkle", i % 2 ? "✦" : "✧");
+    estrella.style.left = `${Math.random() * 96 + 2}%`;
+    estrella.style.top = `${Math.random() * 92 + 4}%`;
+    estrella.style.animationDelay = `${Math.random() * 2.5}s`;
+    estrella.style.fontSize = `${10 + Math.random() * 18}px`;
+    overlay.appendChild(estrella);
+  }
+
+  document.body.appendChild(overlay);
+  document.body.style.overflow = "hidden";
+
+  const detenerFuegos = crearFuegosArtificiales(canvas);
+
+  function cerrarOverlay() {
+    detenerFuegos();
+    overlay.remove();
+    document.body.style.overflow = "";
+    celebracionActiva = false;
+  }
+
+  cerrar.addEventListener("click", cerrarOverlay);
+  overlay.addEventListener("keydown", evento => {
+    if (evento.key === "Escape") cerrarOverlay();
+  });
+  cerrar.focus();
+}
+
+function mostrarUnaVez(clave, accion) {
+  if (celebracionesVistas.has(clave)) return;
+
+  const llave = `calendario-2026-${destinataria}-${clave}`;
+
+  try {
+    if (sessionStorage.getItem(llave) === "si") {
+      celebracionesVistas.add(clave);
+      return;
+    }
+    sessionStorage.setItem(llave, "si");
+  } catch (error) {
+    // Si sessionStorage está bloqueado, se usa el control en memoria.
+  }
+
+  celebracionesVistas.add(clave);
+  accion();
+}
+
+function revisarCelebracionPorFecha() {
+  if (!calendarioAbierto) return;
+
+  const fecha = obtenerFechaColombia();
+
+  if (demoEspecial === "navidad") {
+    mostrarUnaVez("demo-navidad", () => mostrarCelebracion("navidad"));
+    return;
+  }
+
+  if (demoEspecial === "ano-nuevo") {
+    mostrarUnaVez("demo-ano-nuevo", () => mostrarCelebracion("ano-nuevo"));
+    return;
+  }
+
+  if (fecha.anio === 2026 && fecha.mes === 12 && fecha.dia === 25) {
+    mostrarUnaVez("navidad", () => mostrarCelebracion("navidad"));
+  }
+
+  if (fecha.anio === 2027 && fecha.mes === 1 && fecha.dia === 1) {
+    mostrarUnaVez("ano-nuevo", () => mostrarCelebracion("ano-nuevo"));
+  }
+}
+
+window.setInterval(revisarCelebracionPorFecha, 15000);
+
+
+/* =========================================================
+   21. INICIALIZACIÓN
 ========================================================= */
 
 actualizarProgreso();
