@@ -225,8 +225,8 @@ const accesos = {
     pista: "La etapa en la que comenzó esta amistad y todo lo que vino después."
   },
   laura: {
-    contrasena: "patinodecine",
-    pista: "Una broma recurrente sobre un plan de cine que todavía nos espera."
+    contrasena: "Laurel",
+    pista: "Apodo que te di y especie de planta."
   },
   luisa: {
     contrasena: "futurohipotetico",
